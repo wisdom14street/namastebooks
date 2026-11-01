@@ -108,3 +108,62 @@ body{padding-bottom:52px}@media(min-width:900px){.actionbar{display:none}body{pa
 .scent b{font-family:var(--display);font-size:24px;line-height:1.05}.scent span{font-size:14px;color:var(--muted)}.scent small{margin-top:auto;font-weight:700}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 .trust{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}.trust li:before{content:"\2713";color:#1e6b45;font-weight:700;margin-right:5px}
+/* ==== presentation pass: image boxes, placeholders, filters, product page ==== */
+.ph{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}
+.ph img{display:block;width:100%;height:100%;object-fit:contain}
+.noph{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:14% 10%;text-align:center;
+ background:linear-gradient(160deg,color-mix(in srgb,var(--c,#777) 92%,#000) 0%,color-mix(in srgb,var(--c,#777) 70%,#000) 100%);color:#fff}
+.noph .t1{font:600 clamp(13px,3.6vw,17px)/1.22 var(--display);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}
+.noph .t2{font:500 11px/1.3 var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.noph em{position:absolute;left:0;right:0;bottom:8px;font:500 10px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;font-style:normal;opacity:.7}
+.gallery .main{position:relative}
+.gallery .main.isnoimg .noph .t1{font-size:clamp(20px,5vw,32px);-webkit-line-clamp:6}
+.gallery .main.isnoimg .noph .t2{font-size:13px}
+.pcount{position:absolute;right:10px;bottom:10px;background:#000a;color:#fff;font:600 12px/1 var(--body);padding:6px 9px;border-radius:999px}
+.thumbs{scrollbar-width:thin;padding-bottom:4px}
+.th img{object-fit:contain;background:#fff}
+.meta{display:flex;flex-direction:column;gap:2px;flex:1}
+.meta .price{margin-top:auto}
+.meta .pk{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.card{height:100%}
+.card .clink{display:flex;flex-direction:column;flex:1;text-decoration:none;color:inherit}
+.atc{min-height:44px}
+.frow2{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:8px;font-size:14px}
+.frow2 .ck{display:inline-flex;align-items:center;gap:8px;min-height:36px;cursor:pointer}
+.frow2 .ck input{width:18px;height:18px;accent-color:var(--ink)}
+.frow2 .instock{color:var(--muted);font-size:12.5px;margin-left:auto}
+.count{font-size:13px;color:var(--muted);margin:8px 0 0}
+.empty{grid-column:1/-1;text-align:center;padding:40px 16px;border:1px dashed var(--line);border-radius:var(--r);background:var(--card)}
+.empty p{margin:0 0 8px}
+.h1sub{margin:-4px 0 10px;color:var(--muted);font-size:16px}
+.h1sub a{color:inherit}
+.pdesc{margin:22px 0 6px;padding-top:18px;border-top:1px solid var(--line)}
+.pdesc h2,.spech{font-size:19px;margin:0 0 10px}
+.spech{margin-top:22px}
+.pdesc p{margin:0 0 12px;line-height:1.65}
+.pdesc ul{margin:0 0 12px;padding-left:20px;line-height:1.6}
+.nf{text-align:left}
+.nfsearch{display:flex;gap:8px;margin:18px 0 26px;max-width:560px}
+.nfsearch input{flex:1;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:16px var(--body)}
+@media (max-width:699px){.frow2 .instock{margin-left:0;width:100%}.facts{grid-template-columns:1fr}}
+/* layout fixes: fixed image boxes, no horizontal overflow, collapsible mobile filters */
+.ph{min-height:0;flex:0 0 auto}
+.ph img{position:absolute;inset:0}
+.noph .t1,.noph .t2{width:100%}
+.pdp>*,.info>*{min-width:0}
+.badges{flex-wrap:wrap}
+.bundle li label{min-width:0}
+.bundle li span{min-width:0;overflow-wrap:anywhere}
+.ftoggle{display:none}
+@media (max-width:699px){
+ .frow{grid-template-columns:1fr auto}
+ .frow input{grid-column:1/-1}
+ .ftoggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:600 14px var(--body)}
+ .frow #sort{grid-column:2;grid-row:2;width:auto}
+ .ftoggle{grid-column:1;grid-row:2;justify-self:start}
+ .filters:not(.open) .frow select:not(#sort),.filters:not(.open) .frow2{display:none}
+ .filters.open .frow select:not(#sort){grid-column:1/-1}
+ .filters{position:static}
+}
+.ph{width:100%;align-self:stretch}
+[hidden]{display:none!important}

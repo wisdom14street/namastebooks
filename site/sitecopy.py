@@ -24,7 +24,7 @@ def category(p):
     if not author:
         m = re.search(r'\s[-\u2013]\s([A-Z][\w.\' ]{3,38})$', t)   # "Title - Author" style
         if m and len(m.group(1).split()) <= 4: short, author = t[:m.start()].strip(), m.group(1).strip()
-    shelf = 'sets' if k == 'set' else ('spanish' if SPANISH_RX.search(t) or 'Spanish' in p.get('tags', []) else shelf_of(p))
+    shelf = 'sets' if k == 'set' else 'journals' if k == 'journal' else ('spanish' if SPANISH_RX.search(t) or 'Spanish' in p.get('tags', []) else shelf_of(p))
     INFO[p['handle']] = {'author': author, 'isbn': sku if is_isbn(sku) else '', 'kind': k, 'shelf': shelf, 'short': short or t,
                          'publisher': PUBLISHERS.get(p.get('vendor', ''), ''), 'lang': 'es' if shelf == 'spanish' else 'en'}
     return shelf
@@ -84,6 +84,7 @@ AISLES = {
  'self-help':  ('Self-Help & Personal Growth', 'Self-help', 'self-help-personal-growth-books', 'Manifesting, habits, relationships, purpose and the inner work of everyday life.', '#c48a1a'),
  'spirit':     ('Spirituality & Philosophy', 'Spirituality', 'spirituality-philosophy-books', 'Awakening, consciousness, Stoics and sages: the shelf that does not fit a single tradition.', '#6b4f3a'),
  'spanish':    ('Libros en Espa\u00f1ol', 'En espa\u00f1ol', 'libros-en-espanol', 'Spanish-language titles on tarot, magic, spirituality and self-help.', '#b03a5b'),
+ 'journals':   ('Journals, Almanacs & Calendars', 'Journals', 'guided-journals-almanacs', 'Prompted journals, workbooks, yearly almanacs and wall calendars from book publishers, the kind you write in, read through or hang up for the year.', '#6a5a3a'),
  'sets':       ('Book & Deck Sets', 'Book & deck sets', 'book-and-deck-sets', 'Boxed sets where a full book comes with its own deck of cards.', '#4a3b8f'),
 }
 def CARD_TAG(x): return INFO.get(x['handle'], {}).get('author') or AISLES[x['aisle']][1]
@@ -114,9 +115,16 @@ def shelf_row(S, title, xs, href, link, sub=''):
     if len(xs) < 4: return ''
     return (f'<section class="wrap shelfsec"><div class="sechead"><h2>{E(title)}</h2><a href="{href}">{E(link)} &rarr;</a></div>{f"<p class=\"intro\">{sub}</p>" if sub else ""}'
             f'<div class="grid shelf">{"".join(S.card(x) for x in xs)}</div></section>')
-HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'hindu-yoga', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'feng-shui', 'sets', 'spanish']
+HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'hindu-yoga', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'feng-shui', 'journals', 'sets', 'spanish']
+def _dark(h, target=4.8):
+    """Darken a hex colour until white text on it reaches the WCAG contrast target."""
+    r, g, b = (int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+    def lum(c): c = c / 255; return c / 12.92 if c <= .03928 else ((c + .055) / 1.055) ** 2.4
+    while 1.05 / (0.2126 * lum(r) + 0.7152 * lum(g) + 0.0722 * lum(b) + .05) < target:
+        r, g, b = int(r * .94), int(g * .94), int(b * .94)
+    return '#%02x%02x%02x' % (r, g, b)
 def _spines(S):
-    return '<nav class="spines" aria-label="Shelves">' + ''.join(f'<a href="/shop/{S.AISLES[k][2]}/" style="--c:{S.AISLES[k][4]}"><span>{E(S.AISLES[k][1])}</span><small>{S.cat_count[k]}</small></a>' for k in HOME_ORDER if k in S.AISLE_KEYS) + '</nav>'
+    return '<nav class="spines" aria-label="Shelves">' + ''.join(f'<a href="/shop/{S.AISLES[k][2]}/" style="--c:{_dark(S.AISLES[k][4])}"><span>{E(S.AISLES[k][1])}</span><small>{S.cat_count[k]}</small></a>' for k in HOME_ORDER if k in S.AISLE_KEYS) + '</nav>'
 def HOME_BODY(S):
     top = f'''<section class="bookhead"><div class="wrap"><h1>Namaste Books <span>spiritual, metaphysical &amp; philosophy books</span></h1>
 <p class="small">{S.N:,} books in stock, sorted onto {len(S.AISLE_KEYS)} shelves. The books come from <a href="{S.SHOP}">Namaste Bookshop</a> at 2 W 14th St, NYC, which ships them or holds them for pickup.</p>{_spines(S)}</div></section>'''
@@ -207,12 +215,10 @@ SHELF_LINE = {
  'spirit': 'It is on the general spirituality and philosophy shelf.',
  'spanish': 'Es un libro en espa\u00f1ol, en nuestra secci\u00f3n de libros en espa\u00f1ol.',
  'sets': 'It is a boxed set: a full book together with its own deck of cards.',
+ 'journals': 'Shelved with the guided journals and almanacs: a book meant to be written in or used through the year.',
 }
 def describe(S, x):
-    i = INFO.get(x['handle'], {})
-    s = [f"<b>{E(i.get('short') or x['title'])}</b>" + (f" by {E(i['author'])}" if i.get('author') else '') + '.', SHELF_LINE.get(x['aisle'], '')]
-    if i.get('publisher'): s.append(f"Published by {E(i['publisher'])}.")
-    if i.get('isbn'): s.append(f"ISBN {E(i['isbn'])}.")
+    s = [SHELF_LINE.get(x['aisle'], '')]
     s.append('Ships from New York City, or choose Pickup at checkout and collect it inside Namaste Bookshop at 2 West 14th Street.')
     return [t for t in s if t]
 def PRODUCT_DESC(S, x, v0):
@@ -232,6 +238,7 @@ def LD_EXTRA(S, x, v0):
     if i.get('author'): d['author'] = {'@type': 'Person', 'name': i['author']}
     if i.get('isbn') and i.get('kind') == 'book': d['isbn'] = i['isbn']
     if i.get('publisher'): d['publisher'] = {'@type': 'Organization', 'name': i['publisher']}
+    if i.get('kind') == 'book' and _fmt(x): d['bookFormat'] = 'https://schema.org/' + _fmt(x)
     return d
 
 def ABOUT_DESC(S): return 'About Namaste Books: an online bookstore for the spiritual and metaphysical shelves of Namaste Bookshop, run by Wealth Edge Ventures Inc.'
@@ -274,3 +281,42 @@ def ICON_DRAW(d, s, th):
     d.line([(6*s, 10*s), (20*s, 12*s), (20*s, 33*s), (6*s, 31*s), (6*s, 10*s)], fill=th['accent'], width=w, joint='curve')
     d.line([(34*s, 10*s), (20*s, 12*s), (20*s, 33*s), (34*s, 31*s), (34*s, 10*s)], fill=th['paper'], width=w, joint='curve')
 HOME_SECTIONS = []
+
+# ---- presentation pass hooks ----
+import present as _PR
+DESC_MODE = 'book'
+DESC_HEAD = 'About this book'
+PH_LABEL = 'Cover image coming'
+PH_CLASS = 'cover'
+def _short(x):
+    t = INFO.get(x['handle'], {}).get('short') or x['title']
+    t = re.sub(r'\s*\((?:H|HC|Hardcover|Paperback|PB|P)\)\s*', ' ', t)
+    return _PR.clean_title(t)
+def DISPLAY_TITLE(x): return _short(x)
+def CARD_TITLE(x):
+    t = _short(x)
+    if len(t) > 52 and ':' in t[12:]: t = t[:t.index(':', 12)].strip()
+    return t
+def PH_LINES(x): return [(x['ctitle'], 't1'), (INFO.get(x['handle'], {}).get('author', ''), 't2')]
+def H1_SUB(S, x):
+    a = INFO.get(x['handle'], {}).get('author')
+    if not a: return ''
+    return 'by ' + (f'<a href="/authors/{x["brand"]}/">{E(a)}</a>' if x['brand'] else E(a))
+def _fmt(x):
+    t = x['title'] + ' ' + ' '.join(x.get('tags', []))
+    if re.search(r'\((?:H|HC)\)|hardcover|hardback', t, re.I): return 'Hardcover'
+    if re.search(r'paperback|\(P\)|\bPB\b', t, re.I): return 'Paperback'
+    return ''
+def _pages(x):
+    m = re.search(r'(\d{2,4})\s*pages\b', re.sub('<[^>]+>', ' ', x.get('raw_body') or ''), re.I)
+    return m.group(1) if m and 20 <= int(m.group(1)) <= 3000 else ''
+_FE = FACTS_EXTRA
+def FACTS_EXTRA(S, x, v0):
+    f = _FE(S, x, v0)
+    if _fmt(x): f.append(('Format', _fmt(x)))
+    if _pages(x): f.append(('Pages', _pages(x)))
+    return f
+
+PK_LABEL = 'Ready for pickup on 14th St'
+PH_FILTER = 'Only titles with cover photos'
+INSTOCK_NOTE = 'Every title listed is on the shelf now; the list refreshes each morning.'

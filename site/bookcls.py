@@ -5,6 +5,7 @@ BOOK_TYPES = {'books','book','spiritual book','tarot book','eastern spirituality
  'sound healing book','witchcraft book','mindfulness golf book','spiritual scripture','epic fiction','religious text','daily reader','almanacs & calendars'}
 DECK = re.compile(r'\b(deck|oracle cards?|tarot cards|card set|lenormand|affirmation cards|playing cards|flash ?cards|\d+ cards)\b', re.I)
 SETOK = re.compile(r'(?<!guide)book ?(and|&|/) ?(deck|cards)|(deck|cards) ?(and|&|/) ?(?<!guide)book\b|illustrated book|book (box )?set|box set: .*book', re.I)
+JOURNAL = re.compile(r'\bjournal\b|workbook|guided prompts|prompt book', re.I)
 NOTBOOK = re.compile(r'reading with|\bmins?\b|minute reading|calendar|bookmark|book ?end|bookstand|book stand|journal|notebook|candle|incense|bracelet|necklace|pendant|\bring\b|crystal tumbled|statue|pouch|bag\b|calendar 20', re.I)
 def is_isbn(s): return bool(re.fullmatch(r'97[89]\d{10}', s or '')) or bool(re.fullmatch(r'\d{9}[\dX]', s or ''))
 def book_kind(p):
@@ -13,9 +14,22 @@ def book_kind(p):
     sku = (p['variants'][0].get('sku') or '').strip()
     if ty in ('tarot deck','oracle cards','oracle deck','lenormand deck','mini deck','affirmation deck','tarot set','tarot kit','celtic oracle deck','dream oracle deck','astrology oracle deck','inspirational cards','affirmation cards','inspiration cards','collectable cards','playing cards'):
         return 'set' if SETOK.search(t) or (ty in ('tarot set','tarot kit') and re.search(r'book', t, re.I)) else None
-    if ty == 'journals' or ty == 'greeting cards': return None
-    bookish = ty in BOOK_TYPES or (ty == '' and (is_isbn(sku) or re.search(r'\bby [A-Z][\w.\'-]+', t)))
+    if ty == 'greeting cards': return None
+    if re.search(r'reading with|\bmins?\b|minute reading|witch talk|hypnotherapy|energy cleansing with', t, re.I): return None
+    if ty == 'almanacs & calendars' or re.search(r'\b20\d\d\b.*\bcalendar\b|\bcalendar\b.*\b20\d\d\b', t, re.I): return 'journal'
+    if ty in ('audio course', 'dvd', 'spiritual dvd'): return 'book'
+    bookish = ty in BOOK_TYPES or (ty in ('', 'home decor', 'journal', 'journals', 'gifts') and (is_isbn(sku) or re.search(r'\b[Bb]y [A-Z][\w.\'-]+', t)) and not re.search(r'deck of cards|notebook|wall poster', t, re.I))
     if not bookish: return None
+    if JOURNAL.search(t) and not re.search(r'notebook|blank|handcrafted paper|assorted designs', t, re.I) and (is_isbn(sku) or re.search(r'\b[Bb]y [A-Z]', t)): return 'journal'
+    if re.search(r'\balmanac|datebook|day planner|planner\b', t, re.I) and not re.search(r'wall calendar', t, re.I): return 'journal'
+    st, au = split_author(t)
+    if au and (ty in BOOK_TYPES or ty == ''):
+        # a titled book with a named author: only rule out decks, kits and blank stationery
+        if SETOK.search(t): return 'set'
+        if ':' not in st and re.search(r'(\bdeck|\bcards|\bkit)\s*$', st, re.I) and not re.search(r'guide|understanding|reading|hidden|code|book', st, re.I): return None
+        if re.search(r'\b\d+\s*cards\b|\b(deck|cards) (and|&) guide|blank|bookmark|wall calendar|art notebook', st, re.I): return None
+        if re.search(r'reading with|\bmins?\b|minute reading', st, re.I): return None
+        return 'book'
     if NOTBOOK.search(t) and not re.search(r'\bbook\b|guide', t, re.I): return None
     if DECK.search(t): return 'set' if SETOK.search(t) else None
     return 'book'
@@ -52,7 +66,7 @@ def shelf_of(p):
         if re.search(rx, body, re.I): return k
     return 'self-help' if re.search(SHELVES[-1][1], body, re.I) else 'spirit'
 def split_author(t):
-    m = re.search(r'\s+by\s+([A-Z][^()|]+?)\s*$', t)
+    m = re.search(r'\s+[Bb]y\s+((?:[A-Z]|don |bell )[^()|]+?)\s*$', t)
     if not m: return t.strip(), ''
     a = m.group(1).strip(' .,-')
     a = re.split(r'\s*(?:,|;|&| and | with | \(|foreword|illustrated)\s*', a)[0].strip()
