@@ -1,0 +1,23 @@
+{
+ "brand": "Namaste Books",
+ "short_name": "Namaste Books",
+ "site_url": "https://namastebooks.com",
+ "storefront": "Namaste Books",
+ "store_type": "BookStore",
+ "bestseller_collections": [
+  "books",
+  "metaphysical-divination-books",
+  "spirituality-religion-books"
+ ],
+ "theme": {
+  "ink": "#3b1e16",
+  "paper": "#f7f1e6",
+  "accent": "#d9a441",
+  "fonts": "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,500&family=Libre+Franklin:wght@400;600;700&display=swap"
+ },
+ "REVIEW_URL": "",
+ "GOOGLE_SITE_VERIFICATION": "",
+ "siblings": [],
+ "include_no_photo": false,
+ "GA_MEASUREMENT_ID": "G-Y7R5K9NMW0"
+}

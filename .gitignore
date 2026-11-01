@@ -1,0 +1,6 @@
+__pycache__/
+dist/
+data/
+*.zip
+.env
+.env.*

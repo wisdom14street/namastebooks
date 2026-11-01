@@ -1,20 +1,37 @@
-name: Deploy namastebooks.com to GitHub Pages
+name: Build and deploy namastebooks.com to GitHub Pages
+
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "13 11 * * *"   # daily refresh of products, prices, stock and best-seller order from namastebookshop.com
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install segno pillow
+      - name: Fetch catalog, pickup, best sellers; build namastebooks.com
+        run: |
+          mkdir -p data
+          python3 scripts/fetch.py
+          python3 scripts/pickup.py
+          python3 scripts/bestsellers.py || echo "best-seller order unavailable; building without it"
+          python3 scripts/build.py --site=https://namastebooks.com
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
