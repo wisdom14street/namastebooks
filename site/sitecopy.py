@@ -1,7 +1,7 @@
 """Namaste Books (namastebooks.com): a browsable bookstore for the spiritual, metaphysical and philosophy shelves of the
 Namaste inventory. Books only (plus true book-and-deck sets). Copy written for this site only."""
 import re, os, json, types, collections
-from bookcls import book_kind, shelf_of, split_author, is_isbn, is_spanish_title, off_topic
+from bookcls import book_kind, shelf_of, split_author, is_isbn, is_spanish_title, off_topic, reviewed_shelf, SHELF_KEYS
 E = __import__('html').escape
 ICON = 'book'
 FAM_LABEL, FAM_ALL, STYLE_LABEL, STYLE_ALL = 'Kind of book', 'Every kind', 'Edition', 'All editions'
@@ -27,7 +27,8 @@ def category(p):
     k = book_kind(p)
     if not k: return None
     t = p['title']; sku = (p['variants'][0].get('sku') or '').strip()
-    if k == 'book' and off_topic(t): return None
+    reviewed = reviewed_shelf(p)
+    if k == 'book' and off_topic(t) and not reviewed: return None
     short, author = split_author(t)
     if not author:
         m = re.search(r'\s[-\u2013]\s([A-Z][\w.\' ]{3,38})$', t)   # "Title - Author" style
@@ -36,7 +37,16 @@ def category(p):
     isbn = sku if is_isbn(sku) else (sku_n if is_isbn(sku_n) else '')
     ty = (p.get('product_type') or '').strip().lower()
     kind = 'video' if ty in ('dvd', 'spiritual dvd') else 'audio' if ty == 'audio course' else k
-    shelf = 'sets' if k == 'set' else 'journals' if k == 'journal' else ('spanish' if is_spanish_title(t, p.get('tags') or []) else shelf_of(p))
+    if reviewed:
+        shelf = reviewed
+    elif k == 'set':
+        shelf = 'sets'
+    elif k == 'journal':
+        shelf = 'journals'
+    elif is_spanish_title(t, p.get('tags') or []):
+        shelf = 'spanish'
+    else:
+        shelf = shelf_of(p)
     INFO[p['handle']] = {'author': author, 'isbn': isbn, 'kind': kind, 'shelf': shelf, 'short': short or t,
                          'publisher': publisher_name(p.get('vendor', '')), 'lang': 'es' if shelf == 'spanish' else 'en'}
     return shelf

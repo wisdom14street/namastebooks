@@ -9,7 +9,7 @@ from collections import Counter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path[:0] = [os.path.join(ROOT, 'scripts'), os.path.join(ROOT, 'site')]
 import sitecopy
-from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES
+from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES, reviewed_shelf, SHELF_KEYS
 
 RAW = json.load(open(os.path.join(ROOT, 'data', 'all_products.json')))
 FAILS = []
@@ -167,6 +167,35 @@ for needle, shelf in MUST_CONTAIN:
         continue
     if shelf not in hits:
         fail(f'{needle!r} in stock but not on {shelf}: {set(hits)}')
+
+if set(sitecopy.AISLES) != set(SHELF_KEYS):
+    fail(f'SHELF_KEYS drifted from AISLES: {sorted(set(sitecopy.AISLES) ^ set(SHELF_KEYS))}')
+
+def _fake(title, tags, typ='books'):
+    return {'title': title, 'handle': 'fixture', 'product_type': typ, 'tags': tags, 'body_html': '',
+            'variants': [{'sku': '9780000000001', 'price': '12.00', 'available': True}]}
+
+herb = 'Herbal Magick: A Guide to Herbal Enchantments, Folklore, and Divination'
+if sitecopy.category(_fake(herb, [])) != 'herbs':
+    fail('untagged Herbal Magick should stay on herbs')
+if sitecopy.category(_fake(herb, ['nb-shelf:mythology'])) != 'mythology':
+    fail('nb-shelf:mythology should override the keyword shelf')
+if sitecopy.category(_fake(herb, ['NB-Shelf:Witchcraft'])) != 'witchcraft':
+    fail('nb-shelf tag should be read case-insensitively')
+if sitecopy.category(_fake(herb, ['nb-shelf:herbs', 'nb-shelf:mythology'])) != 'herbs':
+    fail('two nb-shelf tags should fall back to the keyword shelf')
+if sitecopy.category(_fake(herb, ['nb-shelf:not-a-shelf'])) != 'herbs':
+    fail('an unknown nb-shelf value should be ignored')
+if sitecopy.category(_fake('Usted puede sanar su vida', ['nb-shelf:tarot'])) != 'tarot':
+    fail('an explicit shelf should beat the Spanish-language rule')
+if sitecopy.category(_fake('Hellboy Seed Of Destruction', [])) is not None:
+    fail('an untagged off-topic book should stay off the site')
+if sitecopy.category(_fake('Hellboy Seed Of Destruction', ['nb-shelf:spirit'])) != 'spirit':
+    fail('a reviewed shelf should keep a book the keyword filter would drop')
+if sitecopy.category(_fake('Llewellyn Tarot Calendar 2027', ['nb-shelf:tarot'], typ='Almanacs & Calendars')) != 'tarot':
+    fail('a reviewed shelf should beat the automatic journal shelf')
+if reviewed_shelf(_fake('Tao Te Ching', ['nb-shelf:feng-shui'])) != 'feng-shui':
+    fail('reviewed_shelf should return the tag key')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')

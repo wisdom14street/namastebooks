@@ -210,6 +210,26 @@ def _first_at(text, shelf):
 
 def shelf_of(p):
     return score_shelf(p)[0]
+
+# Reviewed shelf assignments. One tag, exactly `nb-shelf:<key>`, wins over title rules.
+# Keys match site/sitecopy.py AISLES. Existing subject tags are hints only and are not this contract.
+SHELF_KEYS = frozenset({
+    'tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs',
+    'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric',
+    'religions', 'mythology', 'self-help', 'spirit', 'spanish', 'journals', 'sets',
+})
+_SHELF_TAG = re.compile(r'^nb-shelf:([a-z0-9-]+)$')
+
+def reviewed_shelf(p):
+    """The bookseller's shelf, if this product carries exactly one valid nb-shelf tag. Otherwise None."""
+    found = []
+    for raw in (p.get('tags') or []):
+        m = _SHELF_TAG.match((raw or '').strip().lower())
+        if m and m.group(1) in SHELF_KEYS and m.group(1) not in found:
+            found.append(m.group(1))
+    if len(found) == 1:
+        return found[0]
+    return None
 def split_author(t):
     m = re.search(r'\s+[Bb]y\s+((?:[A-Z]|don |bell )[^()|]+?)\s*$', t)
     if not m: return t.strip(), ''
