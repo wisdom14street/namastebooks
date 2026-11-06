@@ -40,7 +40,8 @@ TITLE_RULES = [
  ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
  ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
  ('astrology', 10, r'astrolog|zodiac|horoscope|birth chart|natal chart|\bsun signs?\b|\bmoon signs?\b|rising sign|jyotish|vedic astrology|mercury retrograde|moonology'),
- ('astrology', 8, r'\blunar\b|\bplanetary\b|\bastro\b|\b(aries|taurus|gemini|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b|self-care for (?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b'),
+ ('astrology', 8, r'\blunar\b|\bplanetary\b|\bastro\b'),
+ ('astrology', 8, r'\b(aries|taurus|gemini|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b|self-care for (?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b'),
  ('witchcraft', 10, r'\bwitch|\bwicca|\bpagans?\b|\bpaganism\b|\bmagick|\bspells?\b|spellcraft|\bgrimoires?\b|\bhoodoo\b|\bconjure|folk magic|book of shadows|\bsabbats?\b|samhain|beltane|imbolc|lughnasadh|\byule\b|\bostara\b|\bmabon\b|\bcovens?\b|\bdruids?\b|\bhekate\b|\bhecate\b|\bmorrigan\b|\bbrigid\b|\bfreya\b|\bfrigg\b|cunning (folk|craft)|\bpentacles?\b|\bpentagrams?\b|\bsorcery\b|\blittle book of death\b'),
  ('witchcraft', 9, r'moon magic|lunar magic|candle magic|folk magic|sex magic|sexual magic|norse magic|cord magic|chaos magic|fairy magic|\bfairies\b|\bfaeries\b|\bfaery\b|\bsigils?\b'),
  ('witchcraft', 4, r'\bmagic\b'),
@@ -137,17 +138,39 @@ def off_topic(title):
     t = _norm(title)
     return any(rx.search(t) for rx in _OFF)
 
+def title_parts(title):
+    """Split a display title into the main title and the subtitle after a colon.
+    'Herbal Magick: A Guide to Folklore' is a herbal-magick book; the subtitle is extra description."""
+    t = _norm(split_author(title or '')[0])
+    m = re.match(r'^([^:]{3,}?):\s+(\S.*)$', t)
+    if not m: return t, ''
+    return m.group(1).strip(), m.group(2).strip()
+
+def _add_rules(scores, text):
+    if not text: return
+    for shelf, w, rx in _TITLE_RULES:
+        if shelf == 'mythology' and _MYTH_SKIP.search(text): continue
+        if rx.search(text): scores[shelf] += w
+
+def _best(scores):
+    return max(scores.values()) if scores else 0
+
 def score_shelf(p):
-    """Return (shelf, score-map). One shelf per book."""
+    """Return (shelf, score-map). One shelf per book.
+    A subject named in the main title beats a different subject that shows up only in the subtitle."""
     from collections import Counter
     full = _norm(p.get('title') or '')
     short, author = split_author(full)
     title = _norm(short)
+    head, sub = title_parts(title)
     tags = {t.lower() for t in (p.get('tags') or [])}
     scores = Counter()
-    for shelf, w, rx in _TITLE_RULES:
-        if shelf == 'mythology' and _MYTH_SKIP.search(title): continue
-        if rx.search(title): scores[shelf] += w
+    _add_rules(scores, head)
+    # Weight 8 and up is a real subject (meditation, herbal, tarot). Weaker hits such as a bare "magic" stay open to the subtitle.
+    head_locked = _best(scores) >= 8
+    if sub and not head_locked:
+        _add_rules(scores, sub)
+    scope = head if head_locked else title
     who = f'{author} {full}'
     for shelf, rx in _AUTHOR_RULES:
         if rx.search(who): scores[shelf] += 8
@@ -155,22 +178,35 @@ def score_shelf(p):
         if tags & names: scores[shelf] += 6
     if scores.get('buddhism') and scores.get('meditation') and re.search(r'buddh|dharma|\bzen\b|dalai|thich|pema|vipassana|sutra|koan|rinpoche|lojong|siddhartha|nhat hanh', who, re.I):
         scores['buddhism'] += 3
-    if re.search(r'\byoga\b', title, re.I) and scores.get('hindu-yoga') and scores.get('herbs'): scores['hindu-yoga'] += 2
-    if re.search(r'qigong|qi gong|chi kung|chi gung', title, re.I) and scores.get('energy'): scores['energy'] += 2
-    if re.search(r'\b(i ching|yi jing)\b', title, re.I) and not re.search(r'feng shui|\btao', title, re.I): scores['divination'] += 2
-    if re.search(r'\btaoism\b|\btaoist\b|tao te|\blao tzu\b|\blaozi\b', title, re.I) and scores.get('feng-shui'): scores['feng-shui'] += 2
-    if re.search(r'notoria|\bsolomon\b|hermetic|kybalion|crowley|golden dawn|ceremonial|book of the dead', title, re.I): scores['esoteric'] += 3
-    if re.search(r'\b(vodou|voodoo|hoodoo)\b', title, re.I) and re.search(r'\b(magic|magick|spells?)\b', title, re.I):
+    if re.search(r'\byoga\b', scope, re.I) and scores.get('hindu-yoga') and scores.get('herbs'): scores['hindu-yoga'] += 2
+    if re.search(r'qigong|qi gong|chi kung|chi gung', scope, re.I) and scores.get('energy'): scores['energy'] += 2
+    if re.search(r'\b(i ching|yi jing)\b', scope, re.I) and not re.search(r'feng shui|\btao', scope, re.I): scores['divination'] += 2
+    if re.search(r'\btaoism\b|\btaoist\b|tao te|\blao tzu\b|\blaozi\b', scope, re.I) and scores.get('feng-shui'): scores['feng-shui'] += 2
+    if re.search(r'notoria|\bsolomon\b|hermetic|kybalion|crowley|golden dawn|ceremonial|book of the dead', scope, re.I): scores['esoteric'] += 3
+    if re.search(r'\b(vodou|voodoo|hoodoo)\b', scope, re.I) and re.search(r'\b(magic|magick|spells?)\b', scope, re.I):
         scores['witchcraft'] = max(scores.get('witchcraft', 0), 11)
-    # A book with "tarot" in the title is a tarot book even when it also teaches ceremonial magic or astrology.
-    if re.search(r'\btarot\b', title, re.I) and scores:
+    # "Tarot" in the main title keeps the book on the tarot shelf. A subtitle mention does not.
+    if re.search(r'\btarot\b', scope, re.I) and scores:
         scores['tarot'] = max(scores.get('tarot', 0), max(scores.values()) + 1)
     if not scores: return 'spirit', {}
     best = max(scores.values())
     if best < 5: return 'spirit', dict(scores)
     winners = [k for k, v in scores.items() if v == best]
-    winners.sort(key=lambda k: TIE_ORDER.index(k) if k in TIE_ORDER else 50)
+    # When the main title already names a subject, a tie breaks toward whichever word comes first.
+    # Other ties keep the usual shelf order, so books without a subtitle do not move.
+    if head_locked and sub:
+        winners.sort(key=lambda k: (_first_at(head, k), TIE_ORDER.index(k) if k in TIE_ORDER else 50))
+    else:
+        winners.sort(key=lambda k: TIE_ORDER.index(k) if k in TIE_ORDER else 50)
     return winners[0], dict(scores)
+
+def _first_at(text, shelf):
+    pos = 10**6
+    for s, w, rx in _TITLE_RULES:
+        if s != shelf: continue
+        m = rx.search(text or '')
+        if m: pos = min(pos, m.start())
+    return pos
 
 def shelf_of(p):
     return score_shelf(p)[0]
