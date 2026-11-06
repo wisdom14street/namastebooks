@@ -33,38 +33,147 @@ def book_kind(p):
     if NOTBOOK.search(t) and not re.search(r'\bbook\b|guide', t, re.I): return None
     if DECK.search(t): return 'set' if SETOK.search(t) else None
     return 'book'
-SHELVES = [
- ('tarot', r'\btarot|lenormand|cartomancy|major arcana|minor arcana', ('tarot book','beginner tarot','learning tarot','tarot')),
- ('divination', r'\brunes?\b|pendulum|i ching|numerolog|palmistry|palm reading|oracle|divination|tea leaf|tea leaves|scrying|dowsing|geomancy|psychic|clairvoyan|mediumship|intuition', ('pendulum books','intuition')),
- ('astrology', r'astrolog|zodiac|horoscope|birth chart|natal|planets?\b|\bsun signs?|moon signs?|saturn return|vedic astrology|jyotish|mercury retrograde', ('astrology',)),
- ('witchcraft', r'witch|wicca|wiccan|pagan|magick|spells?\b|spellcraft|grimoire|hoodoo|conjure|folk magic|occult|sabbat|samhain|beltane|coven|goddess|druid|norse|celtic|faery|fairy|fae\b', ('divination and wicca',)),
- ('crystals', r'crystal|gemstone|\bstones?\b|minerals?', ('crystal book','crystals','stones')),
- ('buddhism', r'buddh|\bzen\b|dharma|dalai lama|thich|nhat hanh|tibetan|lama\b|vipassana|bodhi|sutra(?!s)|pema ch|mindful|meditat|koan|tao\b|taois|tao te|lao tzu|chuang', ('buddhism','meditation','mindfulness','thich nath hanh')),
- ('hindu-yoga', r'\byoga|vedant|vedic|veda\b|vedas|gita|hindu|krishna|shiva|ganesh|upanishad|ramayana|mahabharata|yogananda|ramana|ayurved|tantra|kundalini|sanskrit|mantra|bhakti|patanjali|advaita|swami|guru|devi|kali\b|hanuman|sri |osho|kriya', ('yoga & ayurveda','tantra','bhagavad gita','hinduism','osho','vedanta','yoga','kriya yoga','ayurveda','patanjali','yoga sutras','indian philosophy','eastern spirituality')),
- ('angels', r'\bangel|archangel|spirit guide|ascended master|guardian', ('angels','angel books')),
- ('dreams', r'\bdream|lucid|sleep|astral|out-of-body|out of body', ('dreams','intent-sleep-dreams')),
- ('energy', r'chakra|reiki|aura\b|auras|energy healing|energy medicine|subtle body|qigong|chi gung|reflexolog|sound healing|singing bowl|acupress|acupunct', ('chakras','reiki','bodywork/reiki','energy healing','chakra healing','energy medicine','sound healing')),
- ('herbs', r'\bherb|aromatherap|essential oil|plant medicine|botanical|flower essence|incense|smudg', ('aromatherapy herbs & oils','essential oils')),
- ('shamanism', r'shaman|medicine wheel|native american|ayahuasca|animal spirit|spirit animal|totem|power animal|plant spirit|curandera|toltec|mayan|aztec|andean', ('shamanism',)),
- ('esoteric', r'kabbal|qabal|hermetic|alchem|gnost|rosicruc|thoth|tarot of|esoteric|mystic|mysteries|theosoph|ancient wisdom|atlantis|egyptian|freemason|sacred geometry|secret teachings|manly p', ('esoteric philosophy','ancient tradition philosophy','western spirituality')),
- ('religions', r'christ|jesus|bible|gospel|islam|quran|koran|sufi|rumi|hafiz|judaism|jewish|torah|kabbalah|jain|sikh|saint|prayer|catholic|mary\b', ('christianity','islam','judaism','jainism')),
- ('feng-shui', r'feng shui|i ching|confuci|chinese medicine|qi\b', ('asian philosophy/ feng shui',)),
- ('self-help', r'manifest|law of attraction|abundance|self-help|self help|happiness|habits|success|healing your|heal your|anxiety|confidence|self-esteem|relationships?|love\b|forgive|grief|purpose|mindset|motivation|wisdom|life\b|power of|journey', ('self help','manifestation','personal growth','self-help','intent-money-abundance','intent-manifestation')),
+# Scored shelves. A title can mention several subjects; the strongest specific signal wins.
+# Broad words (life, love, stone, planet, meditation-as-a-prefix, goddess, bare "magic") are not shelves by themselves.
+# Blurbs are not used: a passing mention was filing Aristotle under crystals and myth collections under witchcraft.
+TITLE_RULES = [
+ ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
+ ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
+ ('astrology', 10, r'astrolog|zodiac|horoscope|birth chart|natal chart|\bsun signs?\b|\bmoon signs?\b|rising sign|jyotish|vedic astrology|mercury retrograde|moonology'),
+ ('astrology', 8, r'\blunar\b|\bplanetary\b|\bastro\b|\b(aries|taurus|gemini|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b|self-care for (?:aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b'),
+ ('witchcraft', 10, r'\bwitch|\bwicca|\bpagans?\b|\bpaganism\b|\bmagick|\bspells?\b|spellcraft|\bgrimoires?\b|\bhoodoo\b|\bconjure|folk magic|book of shadows|\bsabbats?\b|samhain|beltane|imbolc|lughnasadh|\byule\b|\bostara\b|\bmabon\b|\bcovens?\b|\bdruids?\b|\bhekate\b|\bhecate\b|\bmorrigan\b|\bbrigid\b|\bfreya\b|\bfrigg\b|cunning (folk|craft)|\bpentacles?\b|\bpentagrams?\b|\bsorcery\b|\blittle book of death\b'),
+ ('witchcraft', 9, r'moon magic|lunar magic|candle magic|folk magic|sex magic|sexual magic|norse magic|cord magic|chaos magic|fairy magic|\bfairies\b|\bfaeries\b|\bfaery\b|\bsigils?\b'),
+ ('witchcraft', 4, r'\bmagic\b'),
+ ('crystals', 10, r'\bcrystals?\b|\bgemstones?\b|\bminerals?\b|\bmoldavite\b|healing stones|book of stones'),
+ ('buddhism', 10, r'\bbuddh|\bdharma\b|\bzen\b|dalai lama|\bthich\b|nhat hanh|pema ch|vajrayana|theravada|mahayana|vipassana|bodhisattva|dhammapada|\bkoans?\b|\bsangha\b|\brinpoche\b|\blojong\b|\btonglen\b|\bsiddhartha\b|heart sutra|diamond sutra|lotus sutra|blooming of a lotus'),
+ ('meditation', 8, r'\bmeditation\b|\bmeditating\b|\bmindfulness\b|\bmindful\b'),
+ ('hindu-yoga', 10, r'\byogas?\b|\byoga\b|vedant|\bvedic\b|\bveda\b|\bvedas\b|bhagavad|\bgita\b|\bhindu|\bkrishna\b|\bshiva\b|\bganesh\b|ganapati|upanishad|ramayana|mahabharata|yogananda|\bramana\b|kundalini|\bsanskrit\b|\bmantras?\b|\bbhakti\b|patanjali|advaita|\bswamis?\b|\byogis?\b|\bkriya\b|\bdevi\b|\bkali\b|\bhanuman\b|\bosho\b|sri aurobindo|nisargadatta|ram dass|krishnamurti|sai baba|amritanandamayi|\bammas?\b|vaisnav|vaishnav|bhagavat|\bsavitri\b|\btantras?\b|\btantric\b|\bshakti\b|\brudra\b|\bpuranas?\b'),
+ ('herbs', 10, r'\bherbs?\b|\bherbal\b|aromatherap|essential oils?|flower essences?|plant medicine|\bayurved|smudg|\bincense\b|traditional chinese medicine|\bchinese medicine\b'),
+ ('herbs', 8, r'\bcannabis\b|\bpsilocybin\b|magic mushrooms|\bbotanicals?\b'),
+ ('energy', 10, r'\bchakras?\b|\breiki\b|\bauras?\b|energy healing|energy medicine|energy field|subtle body|qigong|qi ?gong|chi gung|chi kung|reflexolog|sound healing|singing bowls?|acupressure|acupuncture'),
+ ('dreams', 10, r'\bdreams?\b|lucid dream|\bastral\b|out-of-body|out of body|\bdreamwork\b'),
+ ('angels', 10, r'\bangels?\b|\barchangels?\b|spirit guides?|ascended masters?'),
+ ('shamanism', 10, r'\bshamans?\b|shamanic|medicine wheel|ayahuasca|power animals?|spirit animals?|animal totems?|\btotems?\b|curander[ao]|\btoltec\b|castaneda|miguel ruiz|jose ruiz'),
+ ('shamanism', 8, r'animal magic|\baztec wisdom\b|\bmayan wisdom\b|native american (spirituality|shaman|medicine)|\bpsychedelics?\b|\bnavajo\b|\blakota\b|\bhozho\b|ancestral (medicine|healing)'),
+ ('esoteric', 12, r'occult (philosophy|primer|science|history|book)|ceremonial magic|chaos magic'),
+ ('esoteric', 10, r'kabb?al|qabb?al|hermetic|\balchem|\bgnos[ti]|rosicruc|theosoph|sacred geometry|emerald tablet|\bkybalion\b|\bcrowley\b|\bthelema\b|golden dawn|freemason|\bakash|book of the dead|\bthoth\b|\bankhs?\b|egyptian magic|\bkemetic\b|\bmaat\b|\bbaphomet\b|ars notoria|key of solomon|magic of solomon|lesser key|\bsolomonic\b|\bgurdjieff\b|\bpleiadian\b|seth book'),
+ ('esoteric', 7, r'\boccult\b|\batlantis\b|\bhieroglyph'),
+ ('religions', 10, r'\bchristian|\bjesus\b|\bbible\b|\bgospels?\b|\bislam\b|\bqur.?an\b|\bkoran\b|\bsufis?\b|\bsufism\b|\brumi\b|\bhafiz\b|\bjudaism\b|\bjewish\b|\btorah\b|\btalmud\b|\bjain\b|\bsikhs?\b|\bsikhism\b|\bcatholic\b|teresa of avila|john of the cross|meister eckhart|cloud of unknowing|zoroastr|medjugorje|\blourdes\b|virgin mary|song of solomon|\bimams?\b|\ballah\b|\bbukhari\b|\bhadith\b|prophet muhammad|\bif[aá]\b|\bobatala\b|\bshango\b|\belegba\b|\borishas?\b'),
+ ('religions', 8, r'\bvodou\b|\bvoodoo\b|\bsanter[ií]a\b|\bgibran\b'),
+ ('feng-shui', 10, r'feng[\s-]?shui|\btaoism\b|\btaoist\b|tao te|\blaozi\b|\blao tzu\b|chuang tzu|zhuangzi|zhuang zi|\bconfucius\b|\bconfucian\b|sun tzu|art of war|\bthe tao\b|tao of\b|\btao\b'),
+ ('feng-shui', 8, r'\btai chi\b|\bshaolin\b|five rings|miyamoto|musashi'),
+ ('mythology', 12, r'\bmyths?\b|\bmythology\b|folk (?:&|and) fairy tales|\bfairy tales\b|\blegends\b|\bepic tales\b|\bfolklore\b|\btales of the\b|(?:celtic|norse|greek|egyptian|irish|scottish|slavic|welsh|arthurian) (?:folk )?(?:tales|myths|legends)\b'),
+ ('self-help', 9, r'\bbig magic\b|magic of believing|three magic words|\benneagram\b|\bikigai\b'),
+ ('self-help', 8, r'self-help|self help|law of attraction|\bmanifest(?:ing|ation|s)?\b|\babundance\b|personal growth|self-esteem|self esteem|\bhabits?\b|codependen|inner child|shadow work|\bgrief\b|\bforgive(?:ness)?\b|\banxiety\b'),
+ ('self-help', 6, r'\brelationships?\b'),
+ ('spirit', 8, r'\bfalun\b'),
+ ('spirit', 7, r'\bphilosophy\b|\baristotle\b|\bplato\b|\bsocrates\b|marcus aurelius|\bstoicism\b|\bstoic\b'),
+ ('spirit', 6, r'\benlightenment\b|\bconsciousness\b|\bstoics\b'),
 ]
-SPANISH = re.compile(r'\b(el|la|los|las|del|para|de la|tu|sus|con)\b.*\b(de|y|el|la)\b|ñ|á|é|í|ó|ú', re.I)
+AUTHOR_RULES = [
+ ('buddhism', r'pema ch|chodron|thich nhat|nhat hanh|dalai lama|chogyam trungpa|jack kornfield|sharon salzberg|tulku thondup|\bbhante\b|\bajahn\b|thubten|yongey mingyur|tsoknyi|tenzin palmo|lobsang tenzin'),
+ ('hindu-yoga', r'yogananda|ram dass|krishnamurti|paramahansa|\bosho\b|sri aurobindo|nisargadatta|amritanandamayi|satchidananda|vivekananda|ramakrishna|sai baba|shiva rea|\bprabhuji\b'),
+ ('spirit', r'eckhart tolle|neale donald walsch|david r\.?\s*hawkins|michael a\.?\s*singer'),
+ ('self-help', r'louise hay|rhonda byrne|wayne dyer|gabrielle bernstein|napoleon hill|og mandino'),
+ ('shamanism', r'miguel ruiz|jos[eé] ruiz|alberto villoldo|sandra ingerman'),
+ ('witchcraft', r'\bstarhawk\b|scott cunningham|judika illes'),
+ ('astrology', r'liz greene|steven forrest|robert hand|linda goodman'),
+ ('esoteric', r'aleister crowley|manly p\.?\s*hall|dion fortune|israel regardie|lon milo|regardie|peter j\.?\s*carroll'),
+ ('energy', r'barbara brennan|mantak chia'),
+ ('meditation', r'kabat[\s-]?zinn'),
+]
+# Only subject tags that name the shelf directly. Keyword-soup tags and the shop's broad
+# department labels (self help, mindfulness, esoteric philosophy, divination and wicca) misfile titles.
+TAG_RULES = {
+ 'buddhism': {'thich nath hanh'},
+ 'hindu-yoga': {'yoga & ayurveda', 'tantra', 'bhagavad gita', 'hinduism', 'osho', 'vedanta', 'yoga', 'kriya yoga', 'patanjali', 'yoga sutras', 'indian philosophy'},
+ 'angels': {'angels', 'angel books'},
+ 'dreams': {'dreams', 'intent-sleep-dreams'},
+ 'energy': {'chakras', 'reiki', 'chakra healing', 'energy healing', 'energy medicine', 'sound healing'},
+ 'religions': {'christianity', 'islam', 'judaism', 'jainism'},
+ 'divination': {'pendulum books'},
+}
+# More specific shelf wins a tie. Spirit is the leftover shelf, not a competing subject.
+TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'spirit']
+_TITLE_RULES = [(s, w, re.compile(rx, re.I)) for s, w, rx in TITLE_RULES]
+_AUTHOR_RULES = [(s, re.compile(rx, re.I)) for s, rx in AUTHOR_RULES]
+_MYTH_SKIP = re.compile(r'\b(witch|wicca|pagans?|paganism|spells?|grimoires?|shamans?|shamanic)\b', re.I)
+_ES_MARK = re.compile(r'spanish edition|\(spanish\)|en espa[nñ]ol|edici[oó]n en espa', re.I)
+_ES_WORD = re.compile(r"\b(el|la|los|las|del|una|unos|para|con|por|su|sus|al|que|como|más|mas|pero|este|esta|usted|puede|libro|gu[ií]a|magia|brujer[ií]a|ángeles|angeles|secreto|poder|vida|amor|meditaci[oó]n|espiritual|hechizo|astrolog[ií]a|cuando|sobre|desde|hacia|también|tambien|palabras|todo|sanar|curaci[oó]n|maestr[ií]a|acuerdos?|camino|sueños|suenos|método|metodo|cómo|como|ñ)\b", re.I)
+_ES_ACCENT = re.compile(r'[áéíóúñ¿¡]', re.I)
+_FR = re.compile(r'\b(médecine|spirituelle|une histoire|le livre|des |et les)\b', re.I)
+_OFF = [
+ re.compile(r'^stretching anatomy\b', re.I),
+ re.compile(r'^pilates (anatomy|body|for everyone)\b', re.I),
+ re.compile(r'\btrim healthy mama\b', re.I),
+ re.compile(r'\bhellboy\b', re.I),
+ re.compile(r'\bland of stories\b', re.I),
+ re.compile(r'short stories from the age of queen victoria', re.I),
+ re.compile(r'endless apocalypse short stories', re.I),
+ re.compile(r'^until august\b', re.I),
+ re.compile(r'history of horror, fear, and the uncanny', re.I),
+]
+def _norm(s):
+    s = re.sub(r'[\u00a0\u202f\u2007\u2009\u200a]', ' ', s or '')
+    s = re.sub(r'[\u2010\u2011\u2012\u2013\u2014\u2212]', '-', s)
+    return s.replace('\u2019', "'").replace('\u2018', "'")
+
+def is_spanish_title(title, tags=()):
+    """Language shelf, decided from the title rather than a subject guess."""
+    tags = [t.lower() for t in (tags or [])]
+    if 'spanish' in tags or _ES_MARK.search(title or ''): return True
+    t = _norm(title)
+    if _FR.search(t) and not re.search(r'[ñ¿¡]|ción\b|brujer', t, re.I): return False
+    hits = {m.group(0).lower() for m in _ES_WORD.finditer(t)}
+    accents = len(_ES_ACCENT.findall(t))
+    if accents and len(hits) >= 2: return True
+    if len(hits) >= 3: return True
+    if re.search(r'\b(brujer[ií]a|hechizos?|astrolog[ií]a|ángeles|espiritualidad|meditaci[oó]n)\b', t, re.I): return True
+    return False
+
+def off_topic(title):
+    """Books the shop stocks that are not part of this bookstore: fitness manuals, diet cookbooks, comics, and general fiction.
+    Calendars, journals, audio, and DVDs are not decided here."""
+    t = _norm(title)
+    return any(rx.search(t) for rx in _OFF)
+
+def score_shelf(p):
+    """Return (shelf, score-map). One shelf per book."""
+    from collections import Counter
+    full = _norm(p.get('title') or '')
+    short, author = split_author(full)
+    title = _norm(short)
+    tags = {t.lower() for t in (p.get('tags') or [])}
+    scores = Counter()
+    for shelf, w, rx in _TITLE_RULES:
+        if shelf == 'mythology' and _MYTH_SKIP.search(title): continue
+        if rx.search(title): scores[shelf] += w
+    who = f'{author} {full}'
+    for shelf, rx in _AUTHOR_RULES:
+        if rx.search(who): scores[shelf] += 8
+    for shelf, names in TAG_RULES.items():
+        if tags & names: scores[shelf] += 6
+    if scores.get('buddhism') and scores.get('meditation') and re.search(r'buddh|dharma|\bzen\b|dalai|thich|pema|vipassana|sutra|koan|rinpoche|lojong|siddhartha|nhat hanh', who, re.I):
+        scores['buddhism'] += 3
+    if re.search(r'\byoga\b', title, re.I) and scores.get('hindu-yoga') and scores.get('herbs'): scores['hindu-yoga'] += 2
+    if re.search(r'qigong|qi gong|chi kung|chi gung', title, re.I) and scores.get('energy'): scores['energy'] += 2
+    if re.search(r'\b(i ching|yi jing)\b', title, re.I) and not re.search(r'feng shui|\btao', title, re.I): scores['divination'] += 2
+    if re.search(r'\btaoism\b|\btaoist\b|tao te|\blao tzu\b|\blaozi\b', title, re.I) and scores.get('feng-shui'): scores['feng-shui'] += 2
+    if re.search(r'notoria|\bsolomon\b|hermetic|kybalion|crowley|golden dawn|ceremonial|book of the dead', title, re.I): scores['esoteric'] += 3
+    if re.search(r'\b(vodou|voodoo|hoodoo)\b', title, re.I) and re.search(r'\b(magic|magick|spells?)\b', title, re.I):
+        scores['witchcraft'] = max(scores.get('witchcraft', 0), 11)
+    # A book with "tarot" in the title is a tarot book even when it also teaches ceremonial magic or astrology.
+    if re.search(r'\btarot\b', title, re.I) and scores:
+        scores['tarot'] = max(scores.get('tarot', 0), max(scores.values()) + 1)
+    if not scores: return 'spirit', {}
+    best = max(scores.values())
+    if best < 5: return 'spirit', dict(scores)
+    winners = [k for k, v in scores.items() if v == best]
+    winners.sort(key=lambda k: TIE_ORDER.index(k) if k in TIE_ORDER else 50)
+    return winners[0], dict(scores)
+
 def shelf_of(p):
-    t = p['title']; tags = [x.lower() for x in p.get('tags', [])]
-    if 'spanish' in tags: return 'spanish'
-    tl = re.sub(r'\bby [A-Z].*$', '', t)
-    for k, rx, tg in SHELVES:
-        if re.search(rx, tl, re.I): return k
-    for k, rx, tg in SHELVES:
-        if any(x in tg for x in tags): return k
-    body = re.sub('<[^>]+>', ' ', p.get('body_html') or '')[:600]
-    for k, rx, tg in SHELVES:
-        if k in ('self-help',): continue
-        if re.search(rx, body, re.I): return k
-    return 'self-help' if re.search(SHELVES[-1][1], body, re.I) else 'spirit'
+    return score_shelf(p)[0]
 def split_author(t):
     m = re.search(r'\s+[Bb]y\s+((?:[A-Z]|don |bell )[^()|]+?)\s*$', t)
     if not m: return t.strip(), ''

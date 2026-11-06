@@ -8,7 +8,7 @@ COPY = {
  'badges': [('Books only', 'Sorted onto real subject shelves'), ('Every author searchable', 'Type a name in the search box'), ('Shipped from NYC', 'Or held for pickup on 14th St'), ('Shopify checkout', 'Through namastebookshop.com')],
  'chips_title': 'Shelves', 'chips': [], 'best': None, 'gift': None,
  'set_sub': 'More from the same shelf. Untick anything you do not want.',
- 'popular': [('Every shelf', '/shelves/'), ('Tarot books', '/shop/tarot-books/'), ('Astrology books', '/shop/astrology-books/'), ('Buddhism & meditation', '/shop/buddhism-meditation-books/'), ('Just added', '/new-arrivals/')],
+ 'popular': [('Every shelf', '/shelves/'), ('Tarot books', '/shop/tarot-books/'), ('Astrology books', '/shop/astrology-books/'), ('Buddhism & Zen', '/shop/buddhism-meditation-books/'), ('Meditation', '/shop/meditation-mindfulness-books/'), ('Just added', '/new-arrivals/')],
  'visit_title': 'Collect Your Books at Namaste Bookshop, 2 W 14th St',
  'visit_desc': 'Namaste Books orders are collected at Namaste Bookshop, 2 West 14th Street, Manhattan. Walking routes from the subway, opening hours and the pickup steps.',
  'visit_h1': 'Collecting books in person',
@@ -21,4 +21,4 @@ COPY = {
           ('How soon can I collect?', 'Most pickup orders are ready in about 2 hours. Wait for the ready email before you set out.'),
           ('Can I browse the books in person?', 'Yes, during opening hours at 2 West 14th Street.'),
           ('Who do I contact about an order?', 'Call 212-645-0141 or email info@namastebookshop.com.')],
- 'llms': 'Online bookstore for spiritual, metaphysical and philosophy books, organized onto subject shelves (tarot, astrology, witchcraft, Buddhism, Hinduism and yoga philosophy, crystals, energy work, esoteric traditions, self-help, Spanish-language titles and more), with author pages and search. Books only, except boxed book-and-deck sets. Checkout on Shopify through namastebookshop.com; ships from New York City or pickup at Namaste Bookshop, 2 W 14th St.'}
+ 'llms': 'Online bookstore for spiritual, metaphysical and philosophy books, organized onto subject shelves (tarot, astrology, witchcraft, Buddhism and Zen, meditation, Hinduism and yoga philosophy, mythology, Taoism and feng shui, crystals, energy work, esoteric traditions, self-help, Spanish-language titles and more), with author pages and search. Books, plus journals, almanacs, calendars, audio, DVDs and boxed book-and-deck sets. Checkout on Shopify through namastebookshop.com; ships from New York City or pickup at Namaste Bookshop, 2 W 14th St. Phone 212-645-0141. Email info@namastebookshop.com.'}
