@@ -9,7 +9,7 @@ from collections import Counter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path[:0] = [os.path.join(ROOT, 'scripts'), os.path.join(ROOT, 'site')]
 import sitecopy
-from bookcls import book_kind, off_topic, is_spanish_title, split_author
+from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES
 
 RAW = json.load(open(os.path.join(ROOT, 'data', 'all_products.json')))
 FAILS = []
@@ -82,6 +82,15 @@ def expect(rx, shelf, why):
         if rx.search(short) and got != shelf:
             fail(f'{why}: {full[:130]} -> {got}, expected {shelf}')
 
+def expect_head(rx, shelf, why):
+    """The subject has to be in the main title. A subtitle mention does not decide the shelf."""
+    rx = re.compile(rx, re.I)
+    for p, got in kept:
+        if got in ('spanish', 'journals', 'sets'): continue
+        head, _ = title_parts(p['title'])
+        if rx.search(head) and got != shelf:
+            fail(f'{why}: {p["title"][:130]} -> {got}, expected {shelf}')
+
 def forbid(shelf, rx, why):
     rx = re.compile(rx, re.I)
     for got, short, full in rows:
@@ -91,8 +100,8 @@ def forbid(shelf, rx, why):
 # Lead subject. Multi-subject titles are allowed to follow the subject the title leads with,
 # so these patterns are the ones that should not lose to a vaguer shelf.
 expect(r'tao te ching', 'feng-shui', 'Tao Te Ching is Taoism, not Buddhism')
-expect(r'\bqigong\b|chi kung', 'energy', 'qigong is energy work')
-expect(r'\btarot\b', 'tarot', 'a title that names the tarot is a tarot book')
+expect_head(r'\bqigong\b|chi kung', 'energy', 'qigong in the main title is energy work')
+expect_head(r'\btarot\b', 'tarot', 'tarot in the main title is a tarot book')
 expect(r"philosopher'?s stone", 'esoteric', "the philosopher's stone is alchemy")
 expect(r'bhagavad gita', 'hindu-yoga', 'the Gita is Hindu philosophy')
 expect(r'\b(norse|greek|celtic|slavic|egyptian) myths\b', 'mythology', 'myth anthologies are not practice manuals')
@@ -109,6 +118,23 @@ forbid('feng-shui', r'\bikigai\b', 'ikigai is not feng shui')
 forbid('self-help', r'dalai lama|thich nhat|pema chodron|tenzin palmo|\blojong\b', 'Buddhist teachers are not filed as self-help')
 forbid('esoteric', r"world's greatest myths|\bgreek myths\b|\begyptian myths\b", 'myth retellings are not the mystery schools')
 forbid('divination', r'^the art of war\b|^art of war\b', 'the Art of War is strategy, not divination')
+
+# A folklore/myth/legend word that appears only after the colon cannot pull a book onto Myths
+# when the main title already names another subject. Myth collections stay on Myths.
+_MYTH_WORD = re.compile(r'\bmyths?\b|\bmythology\b|\bfolklore\b|\blegends?\b|\bfairy tales\b|\bepic tales\b', re.I)
+for p, shelf in kept:
+    if shelf in ('spanish', 'journals', 'sets'): continue
+    head, sub = title_parts(p['title'])
+    low = p['title'].lower()
+    if low.startswith('herbal magick') and shelf != 'herbs':
+        fail(f'Herbal Magick belongs with herbs, not {shelf}')
+    if 'women who run with the wolves' in low and shelf != 'mythology':
+        fail(f'Women Who Run with the Wolves is a myth collection, not {shelf}')
+    if 'guide to divination' in head.lower() and shelf != 'divination':
+        fail(f'a divination guide belongs on divination, not {shelf}: {p["title"][:100]}')
+    if shelf != 'mythology' or not sub or _MYTH_WORD.search(head): continue
+    if any(s != 'mythology' and w >= 8 and rx.search(head) for s, w, rx in _TITLE_RULES):
+        fail(f'subtitle put this on Myths: {p["title"][:140]}')
 
 # language shelf, checked on the full title
 for p, shelf in kept:
