@@ -210,7 +210,7 @@ def store_ld():
             "address": {"@type": "PostalAddress", "streetAddress": STORE_STREET, "addressLocality": STORE_CITY, "addressRegion": STORE_REGION, "postalCode": STORE_ZIP, "addressCountry": "US"},
             "geo": {"@type": "GeoCoordinates", "latitude": GEO[0], "longitude": GEO[1]}, "hasMap": MAP_LINK,
             "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": d, "opens": o, "closes": c} for d, o, c in HOURS_LD],
-            "parentOrganization": {"@type": "Organization", "name": "Wealth Edge Ventures Inc."}, "containedInPlace": BOOKSHOP}
+            "email": "info@namastebookshop.com", "parentOrganization": {"@type": "Organization", "name": "Wealth Edge Ventures Inc."}, "containedInPlace": BOOKSHOP}
 def ldjson(o): return f'<script type="application/ld+json">{json.dumps(o)}</script>'
 def faq_ld(qas): return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": re.sub('<[^>]+>', '', q), "acceptedAnswer": {"@type": "Answer", "text": re.sub('<[^>]+>', '', a)}} for q, a in qas]}
 def faq_html(qas): return '<div class="faq">' + ''.join(f'<details><summary>{q}</summary><div>{a}</div></details>' for q, a in qas) + '</div>'
@@ -244,7 +244,7 @@ def footer():
 <p class="small">Payment and shipping are handled by namastebookshop.com on Shopify, from New York City.</p></div>
 <div><h2 class="fh">Shop</h2>{''.join(f'<a href="/shop/{AISLES[k][2]}/">{E(AISLES[k][0])}</a>' for k in AISLE_KEYS)}<a href="/authors/">Authors A&ndash;Z</a></div>
 <div><h2 class="fh">Explore</h2>{expl}<a href="/faq/">FAQ</a></div>
-<div><h2 class="fh">Visit</h2><p class="small foottxt">{STORE_ADDR}</p>{''.join(f'<p class="small foottxt">{d}: {h}</p>' for d, h in HOURS)}<a href="tel:{TEL}">Call {PHONE}</a><a href="{DIRECTIONS}" rel="noopener" target="_blank">Get directions</a><a href="/visit/">Visit &amp; pickup info</a>
+<div><h2 class="fh">Visit</h2><p class="small foottxt">{STORE_ADDR}</p>{''.join(f'<p class="small foottxt">{d}: {h}</p>' for d, h in HOURS)}<a href="tel:{TEL}">Call {PHONE}</a><a href="mailto:info@namastebookshop.com">info@namastebookshop.com</a><a href="{DIRECTIONS}" rel="noopener" target="_blank">Get directions</a><a href="/visit/">Visit &amp; pickup info</a>
 <h2 class="fh mt">Help</h2><a href="/about/">About us</a><a href="/shipping/">Shipping</a><a href="/returns/">Returns</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>
 {f'<h2 class="fh mt">Our other shops</h2>{sib}' if sib else ''}</div>
 </div>{p2_popular()}<div class="wrap legalline">{LEGAL} &copy; {datetime.date.today().year} Wealth Edge Ventures Inc.</div></footer>'''
@@ -367,7 +367,7 @@ def p2_robots():
     return 'User-agent: *\nAllow: /\n\n' + ''.join(f'User-agent: {b}\nAllow: /\n\n' for b in AI_BOTS) + f'Sitemap: {SITE}/sitemap.xml\n'
 def p2_llms():
     L = [f'# {BRAND}', '', f'> {P2C["llms"]}', '',
-         f'{BRAND} is a brand of Wealth Edge Ventures Inc. Its books are kept at Namaste Bookshop, {STORE_ADDR}, on West 14th Street by Fifth Avenue in Manhattan. Phone {PHONE}.',
+         f'{BRAND} is a brand of Wealth Edge Ventures Inc. Its books are kept at Namaste Bookshop, {STORE_ADDR}, on West 14th Street by Fifth Avenue in Manhattan. Phone {PHONE}. Email info@namastebookshop.com.',
          'Hours: ' + '; '.join(f'{d}, {h}' for d, h in HOURS) + '.',
          f'Checkout runs on Shopify through namastebookshop.com, which takes payment and ships from New York City.' + (f' Free in-store pickup: choose Pickup at checkout; orders are {READY.lower()}.' if PICKUP_ON else ''),
          f'Roughly {S.ABOUT_N:,} books are listed; the list, prices and stock refresh every day and product pages read live stock.', '',
@@ -465,7 +465,7 @@ page('/', C.HOME_TITLE(S), C.HOME_DESC(S), home, ldjson({"@context": "https://sc
 # ---- shop pages ----
 def shop_page(path, title, desc, h1, sub, preset=None, intro='', crumbs=None, extra_html='', extra_ld=''):
     preset = preset or {}
-    chips = '<button class="f on" data-cat="">All</button>' + ''.join(f'<button class="f" data-cat="{k}" style="--c:{AISLES[k][4]}">{E(AISLES[k][1])} <small>{cat_count[k]}</small></button>' for k in AISLE_KEYS)
+    chips = '<button class="f on" data-cat="">All</button>' + ''.join(f'<button class="f" data-cat="{k}" data-slug="{AISLES[k][2]}" style="--c:{AISLES[k][4]}">{E(AISLES[k][1])} <small>{cat_count[k]}</small></button>' for k in AISLE_KEYS)
     fams = f'<option value="">{E(FAM_ALL)}</option>' + ''.join(f'<option value="{k}">{E(n)}</option>' for k, n, _ in FAMILIES if fam_count[k])
     brands = '<option value="">All authors</option>' + ''.join(f'<option value="{k}">{E(BR.NAME[k])}</option>' for k in sorted(brand_count, key=lambda k: BR.NAME[k].lower()))
     styles = f'<option value="">{E(STYLE_ALL)}</option>' + ''.join(f'<option>{E(s)}</option>' for s in sorted(style_count))
@@ -565,8 +565,8 @@ for x in products:
           "offers": {"@type": "Offer", "price": f"{float(v0['price']):.2f}", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "itemCondition": "https://schema.org/NewCondition",
                      "url": f"{SITE}/products/{x['handle']}/", "seller": {"@type": "Organization", "name": "Wealth Edge Ventures Inc."},
                      **({"availableAtOrFrom": {"@id": SITE + '/#store'}} if x['pickup'] else {})}}
-    _sku = v0['sku'] or ''
-    if _sku.isdigit() and len(_sku) in (8, 12, 13, 14): ld['gtin' + str(len(_sku))] = _sku
+    _sku = re.sub(r'[^0-9]', '', v0['sku'] or '')
+    if len(_sku) in (8, 12, 13, 14): ld['gtin' + str(len(_sku))] = _sku
     if hasattr(C, 'LD_EXTRA'): ld.update(C.LD_EXTRA(S, x, v0))
     ld = {k: v for k, v in ld.items() if v is not None}
     cmp_ = f'<s id="cmp">{money(x["compare"])}</s>' if x['compare'] else '<s id="cmp" hidden></s>'

@@ -1,7 +1,7 @@
 """Namaste Books (namastebooks.com): a browsable bookstore for the spiritual, metaphysical and philosophy shelves of the
 Namaste inventory. Books only (plus true book-and-deck sets). Copy written for this site only."""
 import re, os, json, types, collections
-from bookcls import book_kind, shelf_of, split_author, is_isbn
+from bookcls import book_kind, shelf_of, split_author, is_isbn, is_spanish_title, off_topic
 E = __import__('html').escape
 ICON = 'book'
 FAM_LABEL, FAM_ALL, STYLE_LABEL, STYLE_ALL = 'Kind of book', 'Every kind', 'Edition', 'All editions'
@@ -11,22 +11,34 @@ NAV_AISLES = False
 PRICE_OPTS = '<option value="0-12">Under $12</option><option value="0-18">Under $18</option><option value="0-25">Under $25</option><option value="25-99999">$25 and up</option>'
 PRICE_BANDS = [('Under $15', 0, 15), ('$15 to $25', 15, 25), ('$25 and up', 25, 1e9)]
 
-SPANISH_RX = re.compile(r'spanish edition|\(spanish\)|en espa[nñ]ol|edici[oó]n|\bgu[ií]a\b|hechizo|espiritualidad|\bmagia\b|\blibro\b|\bel poder\b|\bde la\b|\bpara\b.*\bel\b', re.I)
 INFO = {}   # handle -> {'author','isbn','kind','shelf','short','publisher','lang'}
 PUBLISHERS = {'Llewellyn Worldwide Ltd.': 'Llewellyn', 'Llewellyn Publications': 'Llewellyn', 'Red Wheel/Weiser': 'Red Wheel/Weiser', 'New World Library': 'New World Library',
               'Self-Realization Fellowship': 'Self-Realization Fellowship', 'Lotus Press': 'Lotus Press', 'Schiffer Publishing': 'Schiffer Publishing', 'Shambhala Publications': 'Shambhala',
-              'Hay House': 'Hay House', 'Crystal Clarity Publishers': 'Crystal Clarity Publishers', 'DK Publishing': 'DK'}
+              'Hay House': 'Hay House', 'Crystal Clarity Publishers': 'Crystal Clarity Publishers', 'DK Publishing': 'DK',
+              'Simon & Schuster': 'Simon & Schuster', 'Penguin Random House': 'Penguin Random House', 'Harper Collins Publishers': 'HarperCollins',
+              'Hachette Book Group': 'Hachette', 'Penguin Publishing Group': 'Penguin Random House'}
+# Wholesalers and the shop itself are not the book's publisher.
+_SKIP_VENDOR = {'', 'Namaste Bookshop', 'Ingram Publisher Services', 'MPS Distribution Center', 'TexasBKMN', 'Nirvana Inc', 'Consignments', 'Lotus Light Enterprises/NEwleaf', 'Llewellyn 2027'}
+def publisher_name(vendor):
+    vendor = (vendor or '').strip()
+    if vendor in _SKIP_VENDOR: return ''
+    return PUBLISHERS.get(vendor, vendor)
 def category(p):
     k = book_kind(p)
     if not k: return None
     t = p['title']; sku = (p['variants'][0].get('sku') or '').strip()
+    if k == 'book' and off_topic(t): return None
     short, author = split_author(t)
     if not author:
         m = re.search(r'\s[-\u2013]\s([A-Z][\w.\' ]{3,38})$', t)   # "Title - Author" style
         if m and len(m.group(1).split()) <= 4: short, author = t[:m.start()].strip(), m.group(1).strip()
-    shelf = 'sets' if k == 'set' else 'journals' if k == 'journal' else ('spanish' if SPANISH_RX.search(t) or 'Spanish' in p.get('tags', []) else shelf_of(p))
-    INFO[p['handle']] = {'author': author, 'isbn': sku if is_isbn(sku) else '', 'kind': k, 'shelf': shelf, 'short': short or t,
-                         'publisher': PUBLISHERS.get(p.get('vendor', ''), ''), 'lang': 'es' if shelf == 'spanish' else 'en'}
+    sku_n = re.sub(r'[^0-9Xx]', '', sku).upper()
+    isbn = sku if is_isbn(sku) else (sku_n if is_isbn(sku_n) else '')
+    ty = (p.get('product_type') or '').strip().lower()
+    kind = 'video' if ty in ('dvd', 'spiritual dvd') else 'audio' if ty == 'audio course' else k
+    shelf = 'sets' if k == 'set' else 'journals' if k == 'journal' else ('spanish' if is_spanish_title(t, p.get('tags') or []) else shelf_of(p))
+    INFO[p['handle']] = {'author': author, 'isbn': isbn, 'kind': kind, 'shelf': shelf, 'short': short or t,
+                         'publisher': publisher_name(p.get('vendor', '')), 'lang': 'es' if shelf == 'spanish' else 'en'}
     return shelf
 def assign(x): return x['base']
 
@@ -66,24 +78,26 @@ BR = types.SimpleNamespace(NAME=_AN, brand_of=_brand_of, FACTS={})
 def BRAND_ABOUT(name): return {"@type": "Person", "name": name}
 
 AISLES = {
- 'tarot':      ('Tarot Books', 'Tarot', 'tarot-books', 'Card-by-card references, spread books and histories of the tarot.', '#7a3b8f'),
- 'divination': ('Runes, Pendulums & Psychic Arts', 'Divination', 'divination-psychic-books', 'Runes, pendulums, numerology, palmistry, oracles and developing intuition.', '#5b5fa8'),
- 'astrology':  ('Astrology', 'Astrology', 'astrology-books', 'Birth charts, planets, houses, transits and the signs, Western and Vedic.', '#1f5f8b'),
- 'witchcraft': ('Witchcraft, Wicca & Paganism', 'Witchcraft', 'witchcraft-wicca-pagan-books', 'Spellbooks, grimoires, the wheel of the year, folk magic and pagan paths.', '#3d2b4f'),
- 'crystals':   ('Crystals & Stones', 'Crystals', 'crystal-books', 'Crystal references and stone lore, the books people keep next to their collection.', '#2f8f83'),
- 'buddhism':   ('Buddhism, Zen & Meditation', 'Buddhism', 'buddhism-meditation-books', 'Dharma teachers, Zen, Tibetan traditions, Taoism and how-to-sit meditation books.', '#a0522d'),
- 'hindu-yoga': ('Hinduism, Yoga & Vedanta', 'Yoga & Vedanta', 'hinduism-yoga-vedanta-books', 'The Gita and Upanishads, yoga philosophy, tantra, saints and gurus.', '#c2571a'),
- 'angels':     ('Angels & Spirit Guides', 'Angels', 'angel-spirit-guide-books', 'Angels, archangels, guides and the ascended masters.', '#b08a2e'),
+ 'tarot':      ('Tarot Books', 'Tarot', 'tarot-books', 'Card meanings, spreads and histories of the tarot.', '#7a3b8f'),
+ 'astrology':  ('Astrology', 'Astrology', 'astrology-books', 'Birth charts, the signs, houses, transits and Vedic astrology.', '#1f5f8b'),
+ 'divination': ('Runes, Pendulums & Psychic Arts', 'Divination', 'divination-psychic-books', 'Runes, pendulums, the I Ching, numerology, palmistry, Lenormand and psychic development.', '#5b5fa8'),
+ 'crystals':   ('Crystals & Stones', 'Crystals', 'crystal-books', 'Crystal references and stone lore, the books people keep next to a collection.', '#2f8f83'),
  'dreams':     ('Dreams & Astral Travel', 'Dreams', 'dream-books', 'Dream dictionaries, lucid dreaming and astral projection.', '#3a4d7a'),
+ 'angels':     ('Angels & Spirit Guides', 'Angels', 'angel-spirit-guide-books', 'Angels, archangels, guides and the ascended masters.', '#b08a2e'),
  'energy':     ('Chakras, Reiki & Energy Work', 'Energy work', 'chakra-reiki-energy-books', 'The chakra system, Reiki manuals, auras, qigong and sound.', '#8f3b5c'),
- 'herbs':      ('Herbs, Oils & Plant Lore', 'Herbs', 'herbal-aromatherapy-books', 'Herbals, aromatherapy, incense making and the folklore of plants.', '#4f7a2e'),
- 'shamanism':  ('Shamanism & Earth Traditions', 'Shamanism', 'shamanism-books', 'Shamanic journeying, power animals, Toltec wisdom and land-based traditions.', '#7a5a2e'),
+ 'herbs':      ('Herbs, Ayurveda & Plant Lore', 'Herbs & Ayurveda', 'herbal-aromatherapy-books', 'Herbals, Ayurveda, aromatherapy, incense and the folklore of plants.', '#4f7a2e'),
+ 'shamanism':  ('Shamanism & Earth Traditions', 'Shamanism', 'shamanism-books', 'Shamanic journeying, power animals and Toltec teaching.', '#7a5a2e'),
+ 'witchcraft': ('Witchcraft, Wicca & Paganism', 'Witchcraft', 'witchcraft-wicca-pagan-books', 'Spellbooks, the wheel of the year, folk magic and pagan practice.', '#3d2b4f'),
+ 'buddhism':   ('Buddhism & Zen', 'Buddhism', 'buddhism-meditation-books', 'Dharma teachers, Zen and the Tibetan and Theravada traditions.', '#a0522d'),
+ 'meditation': ('Meditation & Mindfulness', 'Meditation', 'meditation-mindfulness-books', 'Sitting, breathing and mindfulness guides that are not filed under one religion.', '#3d6b7a'),
+ 'hindu-yoga': ('Hinduism, Yoga & Vedanta', 'Yoga & Vedanta', 'hinduism-yoga-vedanta-books', 'The Gita and Upanishads, yoga philosophy, tantra and Indian teachers.', '#c2571a'),
+ 'feng-shui':  ('Taoism, Feng Shui & Chinese Wisdom', 'Taoism & feng shui', 'feng-shui-chinese-wisdom-books', 'The Tao Te Ching and Taoist thought, feng shui, and classical Chinese and Japanese strategy.', '#a33a2e'),
  'esoteric':   ('Esoteric, Occult & Mystery Schools', 'Esoteric', 'esoteric-occult-books', 'Hermeticism, Kabbalah, alchemy, ceremonial magic and the Western mystery schools.', '#2b2b2b'),
- 'religions':  ('World Religions & Mystics', 'World religions', 'world-religion-books', 'Christian mystics, Sufism and Rumi, Judaism, Islam, Jainism and comparative religion.', '#5a6b2e'),
- 'feng-shui':  ('Feng Shui & Chinese Wisdom', 'Feng shui', 'feng-shui-chinese-wisdom-books', 'Feng shui, the I Ching and classical Chinese thought.', '#a33a2e'),
- 'self-help':  ('Self-Help & Personal Growth', 'Self-help', 'self-help-personal-growth-books', 'Manifesting, habits, relationships, purpose and the inner work of everyday life.', '#c48a1a'),
- 'spirit':     ('Spirituality & Philosophy', 'Spirituality', 'spirituality-philosophy-books', 'Awakening, consciousness, Stoics and sages: the shelf that does not fit a single tradition.', '#6b4f3a'),
- 'spanish':    ('Libros en Espa\u00f1ol', 'En espa\u00f1ol', 'libros-en-espanol', 'Spanish-language titles on tarot, magic, spirituality and self-help.', '#b03a5b'),
+ 'religions':  ('World Religions & Mystics', 'World religions', 'world-religion-books', 'Christianity, Islam, Judaism, Sufism, Sikh and Jain titles, and African diaspora traditions.', '#5a6b2e'),
+ 'mythology':  ('Myths & Sacred Stories', 'Myths', 'myths-and-sacred-stories', 'Retellings of myths, legends and folk tales. Practice books stay on the tradition shelves.', '#7a3e2e'),
+ 'self-help':  ('Self-Help & Personal Growth', 'Self-help', 'self-help-personal-growth-books', 'Manifesting, habits, grief, relationships and other practical personal-growth titles.', '#c48a1a'),
+ 'spirit':     ('Spirituality & Philosophy', 'Spirituality', 'spirituality-philosophy-books', 'Awakening, consciousness, Stoics and other philosophy that is not one tradition.', '#6b4f3a'),
+ 'spanish':    ('Libros en Espa\u00f1ol', 'En espa\u00f1ol', 'libros-en-espanol', 'Spanish-language titles across the same subjects. Search still finds them by author or title.', '#b03a5b'),
  'journals':   ('Journals, Almanacs & Calendars', 'Journals', 'guided-journals-almanacs', 'Prompted journals, workbooks, yearly almanacs and wall calendars from book publishers, the kind you write in, read through or hang up for the year.', '#6a5a3a'),
  'sets':       ('Book & Deck Sets', 'Book & deck sets', 'book-and-deck-sets', 'Boxed sets where a full book comes with its own deck of cards.', '#4a3b8f'),
 }
@@ -115,7 +129,7 @@ def shelf_row(S, title, xs, href, link, sub=''):
     if len(xs) < 4: return ''
     return (f'<section class="wrap shelfsec"><div class="sechead"><h2>{E(title)}</h2><a href="{href}">{E(link)} &rarr;</a></div>{f"<p class=\"intro\">{sub}</p>" if sub else ""}'
             f'<div class="grid shelf">{"".join(S.card(x) for x in xs)}</div></section>')
-HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'hindu-yoga', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'feng-shui', 'journals', 'sets', 'spanish']
+HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'mythology', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'feng-shui', 'journals', 'sets', 'spanish']
 def _dark(h, target=4.8):
     """Darken a hex colour until white text on it reaches the WCAG contrast target."""
     r, g, b = (int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
@@ -155,7 +169,7 @@ def AISLE_DESC(S, k): return f'{S.cat_count[k]} books on the {AISLES[k][1].lower
 def _lists():
     return [('/reading-list/learning-tarot/', 'Learning tarot: books to read with your first deck', {'aisle': ['tarot'], 'q': r'beginner|learn|101|guide|easy|simple|essential|complete|handbook|made easy'},
              'Titles that teach the cards from the start, with meanings and spreads you can try the same evening.'),
-            ('/reading-list/meditation-to-start/', 'Starting to meditate', {'aisle': ['buddhism', 'spirit', 'self-help'], 'q': r'meditat|mindful|breath|sit\b|stillness'},
+            ('/reading-list/meditation-to-start/', 'Starting to meditate', {'aisle': ['meditation', 'buddhism', 'hindu-yoga', 'spirit'], 'q': r'meditat|mindful|breath|sit\b|stillness'},
              'Short, practical books on sitting, breathing and paying attention, from several traditions.'),
             ('/reading-list/bhagavad-gita/', 'Bhagavad Gita editions and commentaries', {'q': r'gita'}, 'Different translators and teachers on the same 700 verses, so you can pick the voice that suits you.'),
             ('/reading-list/spellbooks-and-grimoires/', 'Spellbooks and grimoires', {'aisle': ['witchcraft', 'esoteric', 'spanish'], 'q': r'spell|grimoire|book of shadows|hechiz|charms|magic\b|magick'},
@@ -201,16 +215,18 @@ SHELF_LINE = {
  'astrology': 'You will find it on the astrology shelf, next to chart guides and books on the planets.',
  'witchcraft': 'It lives on the witchcraft and pagan shelf, among spellbooks and seasonal practice.',
  'crystals': 'It belongs to the crystals and stones shelf.',
- 'buddhism': 'It is on the Buddhism, Zen and meditation shelf.',
+ 'buddhism': 'It is on the Buddhism and Zen shelf.',
+ 'meditation': 'It is on the meditation and mindfulness shelf, with guides that are not filed under one religion.',
  'hindu-yoga': 'It is on the shelf for Hinduism, yoga philosophy and Vedanta.',
  'angels': 'It is shelved with books on angels and spirit guides.',
  'dreams': 'It sits on the dreams and astral travel shelf.',
  'energy': 'It is shelved with chakra, Reiki and energy-work books.',
- 'herbs': 'It is on the herbs, oils and plant lore shelf.',
+ 'herbs': 'It is on the herbs, Ayurveda and plant lore shelf.',
  'shamanism': 'It is on the shamanism and earth traditions shelf.',
  'esoteric': 'It sits with the esoteric and occult titles: Hermetic, Kabbalistic and ceremonial.',
  'religions': 'It is on the world religions and mystics shelf.',
- 'feng-shui': 'It is shelved with feng shui and classical Chinese thought.',
+ 'feng-shui': 'It is shelved with Taoism, feng shui and classical Chinese thought.',
+ 'mythology': 'It is on the myths and sacred stories shelf, with retellings rather than practice manuals.',
  'self-help': 'It is on the self-help and personal growth shelf.',
  'spirit': 'It is on the general spirituality and philosophy shelf.',
  'spanish': 'Es un libro en espa\u00f1ol, en nuestra secci\u00f3n de libros en espa\u00f1ol.',
@@ -233,8 +249,12 @@ def FACTS_EXTRA(S, x, v0):
     return f
 def LD_EXTRA(S, x, v0):
     i = INFO.get(x['handle'], {})
-    d = {'@type': ['Product', 'Book'] if i.get('kind') == 'book' else 'Product', 'inLanguage': 'es' if i.get('lang') == 'es' else None,
-         'brand': {'@type': 'Brand', 'name': i['publisher']} if i.get('publisher') else None}
+    d = {'@type': ['Product', 'Book'] if i.get('kind') == 'book' else 'Product', 'inLanguage': 'es' if i.get('lang') == 'es' else 'en',
+         'brand': {'@type': 'Brand', 'name': i['publisher'] or 'Namaste Books'}}
+    if i.get('isbn'):
+        digits = re.sub(r'[^0-9]', '', i['isbn'])
+        if len(digits) == 13: d['gtin13'] = digits
+        elif len(digits) == 12: d['gtin12'] = digits
     if i.get('author'): d['author'] = {'@type': 'Person', 'name': i['author']}
     if i.get('isbn') and i.get('kind') == 'book': d['isbn'] = i['isbn']
     if i.get('publisher'): d['publisher'] = {'@type': 'Organization', 'name': i['publisher']}
@@ -258,7 +278,7 @@ def FAQ(S):
             ('Do you have books in Spanish?', 'Yes, see <a href="/shop/libros-en-espanol/">Libros en Espa\u00f1ol</a>.'),
             ('How does shipping work?', 'Checkout runs on Shopify through namastebookshop.com. You see every delivery option and its price before paying; parcels leave from New York.'),
             ('Can I pick up instead?', f'Yes. Choose Pickup at checkout and collect at Namaste Bookshop, {S.STORE_ADDR}.' + (f' Orders are {S.READY.lower()}.' if S.READY else '')),
-            ('How are books sorted onto shelves?', 'By the main subject of the title. A book on tarot and astrology lands on whichever subject leads; use the search box to find it either way.')]
+            ('How are books sorted onto shelves?', 'By the main subject of the title. Taoist books sit with Chinese wisdom, myth retellings have their own shelf, and a general meditation guide is not filed as Buddhism. A book that covers two subjects lands on the one the title leads with. Search still finds it either way.')]
 
 def GUIDES(S):
     tiles = ''.join(f'<li><a href="/shop/{S.AISLES[k][2]}/"><b>{E(S.AISLES[k][0])}</b></a> <span class="small">{S.cat_count[k]} books</span><br><span class="small">{E(S.AISLES[k][3])}</span></li>' for k in HOME_ORDER if k in S.AISLE_KEYS)

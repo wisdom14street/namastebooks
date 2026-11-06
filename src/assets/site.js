@@ -60,7 +60,7 @@
     const ft=$('.ftoggle'),fl=$('.filters');if(ft)ft.onclick=()=>{const o=fl.classList.toggle('open');ft.setAttribute('aria-expanded',String(o));ft.textContent=o?'Hide filters':'Filters'};
     if('IntersectionObserver' in window)new IntersectionObserver(es=>{if(es[0].isIntersecting&&!more.hidden){if(data.length){if(shown>0)page()}else load()}},{rootMargin:'900px 0px'}).observe(more);
     ['pk','ph'].forEach(k=>{const el=$('#'+k);if(el)el.onchange=e=>{st[k]=e.target.checked?'1':'';apply()}});
-    $$('.f').forEach(b=>b.onclick=()=>{if(locked){location.href=b.dataset.cat?'/shop/'+meta.aisles[b.dataset.cat].slug+'/':'/shop/';return}st.cat=b.dataset.cat;apply()});
+    $$('.f').forEach(b=>b.onclick=()=>{if(locked){location.href=b.dataset.cat?'/shop/'+(b.dataset.slug||meta.aisles[b.dataset.cat].slug)+'/':'/shop/';return}st.cat=b.dataset.cat;apply()});
     let t;$('#q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{st.q=e.target.value;apply()},180)};
     ['fam','brand','sty','price','sort'].forEach(k=>{const el=$('#'+k);if(el)el.onchange=e=>{st[k]=e.target.value;apply()}});
     const qel=$('#q');if(qel)qel.addEventListener('focus',load,{once:true});if(!$('#grid .card')||[...P.keys()].length)load();

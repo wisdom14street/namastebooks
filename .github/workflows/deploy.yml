@@ -29,6 +29,7 @@ jobs:
         run: |
           mkdir -p data
           python3 scripts/fetch.py
+          python3 scripts/test_shelves.py
           python3 scripts/pickup.py
           python3 scripts/bestsellers.py || echo "best-seller order unavailable; building without it"
           python3 scripts/build.py --site=https://namastebooks.com
