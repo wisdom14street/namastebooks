@@ -366,6 +366,27 @@ if sitecopy.category(_verified('Oracle of the 7 Energies Journal by Colette Baro
     fail('a guided journal with an ISBN stays on the journal shelf')
 if sitecopy.category(_verified('Blank Notebook', 7640535662670, '9781401962913', '', [])) is not None:
     fail('the journal ISBN does not turn a blank notebook into a book')
+if book_kind(_verified('Secret Language of Animals by Chip Richards', 7774867947598, '9780738743196', 'Oracle Cards', ['nb-shelf:divination'])) != 'set':
+    fail('Secret Language of Animals is a guidebook-and-cards set')
+if sitecopy.category(_verified('Secret Language of Animals by Chip Richards', 7774867947598, '9780738743196', 'Oracle Cards', ['nb-shelf:divination'])) != 'divination':
+    fail('the Secret Language tag files the set on divination')
+if sitecopy.category(_verified('Eras Tarot A Deck and Guidebook By Satu Hameenaho-Fox', 7820721455182, '9798894141367', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('the Eras Tarot deck and guidebook should be included on tarot')
+if sitecopy.category(_verified('Japanese Gods & Spirits Oracle By Makoto Akiyama', 7842801320014, '9781923208186', 'Oracle Cards', ['nb-shelf:divination'])) != 'divination':
+    fail('the Japanese Gods oracle set should be included on divination')
+if sitecopy.category(_verified('Dune: Bene Gesserit Tarot Deck and Guide By Minerva Siegel', 7842913812558, '9798337402154', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('the Bene Gesserit deck and guide should be included on tarot')
+if sitecopy.category(_verified('Many Veils of the Moon By Mitchell King', 7842801680462, '9781803419947', 'Oracle Cards', ['nb-shelf:witchcraft'])) != 'witchcraft':
+    fail('Many Veils of the Moon is a verified printed book')
+if sitecopy.category(_verified('Palmistry of Fingerprints By Christopher Jones', 7842802303054, '9781803419961', 'Oracle Cards', ['nb-shelf:divination'])) != 'divination':
+    fail('Palmistry of Fingerprints is a verified printed book')
+if sitecopy.category(_verified('Your Anxiety Is Giving Me Anxiety By Elizabeth April', 7842804465742, '9781637747636', 'Oracle Cards', ['nb-shelf:self-help'])) != 'self-help':
+    fail('Your Anxiety Is Giving Me Anxiety is a verified printed book')
+if sitecopy.category(_verified('Everyday Oracle Deck', 8, '9780738743196', 'Oracle Cards', ['nb-shelf:divination'])) is not None:
+    fail('a plain oracle deck is not included because the ISBN matches a verified set')
+franklin = _verified('The 13 Virtues of Benjamin Franklin', 7637433614414, '816667421986', 'books', [])
+if isbn_of(franklin):
+    fail('the Franklin UPC is not an ISBN and is not mapped')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
