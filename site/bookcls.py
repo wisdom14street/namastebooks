@@ -75,6 +75,8 @@ TITLE_RULES = [
  ('poetry', 12, r'\boceans of thoughts\b'),
  ('sexuality-relationships', 12, r'\bperfumed garden\b'),
  ('history-culture-travel', 12, r'\bluminous kashi\b|\bvibrant varanasi\b'),
+ # Two confirmed military-strategy editions. A bare "art of war" stays with the existing rule.
+ ('strategy-leadership', 12, r'art of war by sun tzu \(translated by thomas cleary\)|art of war by sun tzu \(penguin great ideas edition, translated by john minford\)'),
  ('memoir-essays', 12, r'\ba point of beauty\b'),
  ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
  ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
@@ -134,7 +136,7 @@ TAG_RULES = {
  'divination': {'pendulum books'},
 }
 # More specific shelf wins a tie. Spirit is the leftover shelf, not a competing subject.
-TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry', 'sexuality-relationships', 'history-culture-travel', 'spirit']
+TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry', 'sexuality-relationships', 'history-culture-travel', 'strategy-leadership', 'spirit']
 _TITLE_RULES = [(s, w, re.compile(rx, re.I)) for s, w, rx in TITLE_RULES]
 _AUTHOR_RULES = [(s, re.compile(rx, re.I)) for s, rx in AUTHOR_RULES]
 _MYTH_SKIP = re.compile(r'\b(witch|wicca|pagans?|paganism|spells?|grimoires?|shamans?|shamanic)\b', re.I)
@@ -248,7 +250,7 @@ SHELF_KEYS = frozenset({
     'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric',
     'religions', 'mythology', 'self-help', 'spirit', 'spanish', 'journals', 'sets',
     'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry',
-    'sexuality-relationships', 'history-culture-travel',
+    'sexuality-relationships', 'history-culture-travel', 'strategy-leadership',
 })
 _SHELF_TAG = re.compile(r'^nb-shelf:([a-z0-9-]+)$')
 
