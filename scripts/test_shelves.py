@@ -195,10 +195,10 @@ if sitecopy.category(_fake(herb, ['nb-shelf:not-a-shelf'])) != 'herbs':
     fail('an unknown nb-shelf value should be ignored')
 if sitecopy.category(_fake('Usted puede sanar su vida', ['nb-shelf:tarot'])) != 'tarot':
     fail('an explicit shelf should beat the Spanish-language rule')
-if sitecopy.category(_fake('Hellboy Seed Of Destruction', [])) is not None:
-    fail('an untagged off-topic book should stay off the site')
+if sitecopy.category(_fake('Flame Tree Pocket Notebook With Assorted Designs', [])) is not None:
+    fail('a blank notebook is not a book and stays off the site')
 if sitecopy.category(_fake('Hellboy Seed Of Destruction', ['nb-shelf:spirit'])) != 'spirit':
-    fail('a reviewed shelf should keep a book the keyword filter would drop')
+    fail('a reviewed shelf should override the fiction title rule')
 if sitecopy.category(_fake('Llewellyn Tarot Calendar 2027', ['nb-shelf:tarot'], typ='Almanacs & Calendars')) != 'tarot':
     fail('a reviewed shelf should beat the automatic journal shelf')
 if reviewed_shelf(_fake('Tao Te Ching', ['nb-shelf:feng-shui'])) != 'feng-shui':
@@ -222,6 +222,20 @@ if _shelf('Some Design Annual', ['nb-shelf:art-design']) != 'art-design':
     fail('nb-shelf:art-design should be accepted')
 if _shelf('A Practical Nutrition Program', ['nb-shelf:body-wellness']) != 'body-wellness':
     fail('nb-shelf:body-wellness should be accepted')
+if _shelf("The Land of Stories: An Author's Odyssey by Chris Colfer") != 'fiction':
+    fail('Land of Stories is fiction')
+if _shelf('Short Stories from the Age of Queen Victoria (Gothic Fantasy) edited by Peter Garratt') != 'fiction':
+    fail('the Victorian anthology is fiction')
+if _shelf('A Point of Beauty: True Stories of Holding On and Letting Go by The Moth') != 'memoir-essays':
+    fail('A Point of Beauty is memoir and essays')
+if _shelf('Stretching Anatomy by Arnold G. Nelson') != 'body-wellness':
+    fail('Stretching Anatomy is a fitness book on the bodywork shelf')
+if _shelf('A Novel Someone Reviewed', ['nb-shelf:fiction']) != 'fiction':
+    fail('nb-shelf:fiction should be accepted')
+if _shelf('Essays Someone Reviewed', ['nb-shelf:memoir-essays']) != 'memoir-essays':
+    fail('nb-shelf:memoir-essays should be accepted')
+if _shelf('Hellboy Seed Of Destruction') != 'fiction':
+    fail('Hellboy is a book and belongs on fiction')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')

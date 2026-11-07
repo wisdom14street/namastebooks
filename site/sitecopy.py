@@ -109,6 +109,8 @@ AISLES = {
  'spirit':     ('Spirituality & Philosophy', 'Spirituality', 'spirituality-philosophy-books', 'Awakening, consciousness, Stoics, and philosophy or intellectual biography that is not one tradition.', '#6b4f3a'),
  'art-design': ('Art & Design', 'Art & design', 'art-design-books', 'Visual references for paper, pattern, and design. These are not spiritual practice manuals.', '#5c4a6e'),
  'body-wellness': ('Bodywork, Health & Nutrition', 'Bodywork', 'bodywork-health-nutrition-books', 'Hands-on massage, nutrition, and other physical health programs. Energy-healing manuals stay on the energy shelf, and herbals stay with herbs.', '#3e6b5a'),
+ 'fiction': ('Fiction & Literature', 'Fiction', 'fiction-literature-books', 'Novels, short stories, and other literature. These are not spiritual practice manuals.', '#7a3a45'),
+ 'memoir-essays': ('Biography, Memoir & Essays', 'Memoir & essays', 'biography-memoir-essays-books', 'Biographies, memoirs, and essay collections that are not teachings of one tradition. A philosophy biography stays on the philosophy shelf.', '#5a5346'),
  'spanish':    ('Libros en Espa\u00f1ol', 'En espa\u00f1ol', 'libros-en-espanol', 'Spanish-language titles across the same subjects. Search still finds them by author or title.', '#b03a5b'),
  'journals':   ('Journals, Almanacs & Calendars', 'Journals', 'guided-journals-almanacs', 'Prompted journals, workbooks, yearly almanacs and wall calendars from book publishers, the kind you write in, read through or hang up for the year.', '#6a5a3a'),
  'sets':       ('Book & Deck Sets', 'Book & deck sets', 'book-and-deck-sets', 'Boxed sets where a full book comes with its own deck of cards.', '#4a3b8f'),
@@ -141,7 +143,7 @@ def shelf_row(S, title, xs, href, link, sub=''):
     if len(xs) < 4: return ''
     return (f'<section class="wrap shelfsec"><div class="sechead"><h2>{E(title)}</h2><a href="{href}">{E(link)} &rarr;</a></div>{f"<p class=\"intro\">{sub}</p>" if sub else ""}'
             f'<div class="grid shelf">{"".join(S.card(x) for x in xs)}</div></section>')
-HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'mythology', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'art-design', 'body-wellness', 'feng-shui', 'journals', 'sets', 'spanish']
+HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'mythology', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'feng-shui', 'journals', 'sets', 'spanish']
 def _dark(h, target=4.8):
     """Darken a hex colour until white text on it reaches the WCAG contrast target."""
     r, g, b = (int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
@@ -243,6 +245,8 @@ SHELF_LINE = {
  'spirit': 'It is on the general spirituality and philosophy shelf, including philosophy that is not one religious tradition.',
  'art-design': 'It is an art or design reference, shelved apart from the spiritual practice books.',
  'body-wellness': 'It is on the bodywork, health, and nutrition shelf: practical care of the body, not energy healing or herb lore.',
+ 'fiction': 'It is literature: a novel or stories, not a spiritual practice manual.',
+ 'memoir-essays': 'It is on the biography, memoir, and essays shelf.',
  'spanish': 'Es un libro en espa\u00f1ol, en nuestra secci\u00f3n de libros en espa\u00f1ol.',
  'sets': 'It is a boxed set: a full book together with its own deck of cards.',
  'journals': 'Shelved with the guided journals and almanacs: a book meant to be written in or used through the year.',
@@ -292,7 +296,7 @@ def FAQ(S):
             ('Do you have books in Spanish?', 'Yes, see <a href="/shop/libros-en-espanol/">Libros en Espa\u00f1ol</a>.'),
             ('How does shipping work?', 'Checkout runs on Shopify through namastebookshop.com. You see every delivery option and its price before paying; parcels leave from New York.'),
             ('Can I pick up instead?', f'Yes. Choose Pickup at checkout and collect at Namaste Bookshop, {S.STORE_ADDR}.' + (f' Orders are {S.READY.lower()}.' if S.READY else '')),
-            ('How are books sorted onto shelves?', 'By the main subject of the title, unless a bookseller has assigned a shelf. Taoist books sit with Chinese wisdom, myth retellings have their own shelf, and a general meditation guide is not filed as Buddhism. A paper or design reference is not filed as spirituality, and a physical massage or nutrition book is not filed as energy work or herbs. A philosophy biography stays with philosophy. Search still finds a book either way.')]
+            ('How are books sorted onto shelves?', 'By the main subject of the title, unless a bookseller has assigned a shelf. Taoist books sit with Chinese wisdom, myth retellings have their own shelf, and a general meditation guide is not filed as Buddhism. Novels and stories have a literature shelf. Other biographies and essays have their own shelf, while a philosophy biography stays with philosophy. A paper or design reference is not filed as spirituality, and a physical massage or nutrition book is not filed as energy work or herbs. Search still finds a book either way.')]
 
 def GUIDES(S):
     tiles = ''.join(f'<li><a href="/shop/{S.AISLES[k][2]}/"><b>{E(S.AISLES[k][0])}</b></a> <span class="small">{S.cat_count[k]} books</span><br><span class="small">{E(S.AISLES[k][3])}</span></li>' for k in HOME_ORDER if k in S.AISLE_KEYS)

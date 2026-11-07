@@ -39,7 +39,9 @@ def book_kind(p):
 TITLE_RULES = [
  # Practical references that are not spiritual practice. These outrank a stray word such as "bible".
  ('art-design', 12, r'\bjapanese papers\b'),
- ('body-wellness', 12, r'\bmassage bible\b|\ba week to change your life\b'),
+ ('body-wellness', 12, r'\bmassage bible\b|\ba week to change your life\b|^stretching anatomy\b|^pilates (anatomy|body|for everyone)\b|\btrim healthy mama\b'),
+ ('fiction', 12, r'\bland of stories\b|short stories from the age of queen victoria|endless apocalypse short stories|^until august\b|\bhellboy\b|history of horror, fear, and the uncanny'),
+ ('memoir-essays', 12, r'\ba point of beauty\b'),
  ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
  ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
  ('astrology', 10, r'astrolog|zodiac|horoscope|birth chart|natal chart|\bsun signs?\b|\bmoon signs?\b|rising sign|jyotish|vedic astrology|mercury retrograde|moonology'),
@@ -98,7 +100,7 @@ TAG_RULES = {
  'divination': {'pendulum books'},
 }
 # More specific shelf wins a tie. Spirit is the leftover shelf, not a competing subject.
-TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'spirit']
+TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'spirit']
 _TITLE_RULES = [(s, w, re.compile(rx, re.I)) for s, w, rx in TITLE_RULES]
 _AUTHOR_RULES = [(s, re.compile(rx, re.I)) for s, rx in AUTHOR_RULES]
 _MYTH_SKIP = re.compile(r'\b(witch|wicca|pagans?|paganism|spells?|grimoires?|shamans?|shamanic)\b', re.I)
@@ -106,17 +108,8 @@ _ES_MARK = re.compile(r'spanish edition|\(spanish\)|en espa[nñ]ol|edici[oó]n e
 _ES_WORD = re.compile(r"\b(el|la|los|las|del|una|unos|para|con|por|su|sus|al|que|como|más|mas|pero|este|esta|usted|puede|libro|gu[ií]a|magia|brujer[ií]a|ángeles|angeles|secreto|poder|vida|amor|meditaci[oó]n|espiritual|hechizo|astrolog[ií]a|cuando|sobre|desde|hacia|también|tambien|palabras|todo|sanar|curaci[oó]n|maestr[ií]a|acuerdos?|camino|sueños|suenos|método|metodo|cómo|como|ñ)\b", re.I)
 _ES_ACCENT = re.compile(r'[áéíóúñ¿¡]', re.I)
 _FR = re.compile(r'\b(médecine|spirituelle|une histoire|le livre|des |et les)\b', re.I)
-_OFF = [
- re.compile(r'^stretching anatomy\b', re.I),
- re.compile(r'^pilates (anatomy|body|for everyone)\b', re.I),
- re.compile(r'\btrim healthy mama\b', re.I),
- re.compile(r'\bhellboy\b', re.I),
- re.compile(r'\bland of stories\b', re.I),
- re.compile(r'short stories from the age of queen victoria', re.I),
- re.compile(r'endless apocalypse short stories', re.I),
- re.compile(r'^until august\b', re.I),
- re.compile(r'history of horror, fear, and the uncanny', re.I),
-]
+# Actual books stay. Blank stationery, decks, and services are excluded by book_kind, not here.
+_OFF = []
 def _norm(s):
     s = re.sub(r'[\u00a0\u202f\u2007\u2009\u200a]', ' ', s or '')
     s = re.sub(r'[\u2010\u2011\u2012\u2013\u2014\u2212]', '-', s)
@@ -136,7 +129,7 @@ def is_spanish_title(title, tags=()):
     return False
 
 def off_topic(title):
-    """Books the shop stocks that are not part of this bookstore: fitness manuals, diet cookbooks, comics, and general fiction.
+    """Reserved for titles that are not books. Fiction, memoirs, and physical-health books are shelves, not exclusions.
     Calendars, journals, audio, and DVDs are not decided here."""
     t = _norm(title)
     return any(rx.search(t) for rx in _OFF)
@@ -220,7 +213,7 @@ SHELF_KEYS = frozenset({
     'tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs',
     'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric',
     'religions', 'mythology', 'self-help', 'spirit', 'spanish', 'journals', 'sets',
-    'art-design', 'body-wellness',
+    'art-design', 'body-wellness', 'fiction', 'memoir-essays',
 })
 _SHELF_TAG = re.compile(r'^nb-shelf:([a-z0-9-]+)$')
 
