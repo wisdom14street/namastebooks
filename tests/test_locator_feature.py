@@ -5,7 +5,7 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path[:0] = [os.path.join(ROOT, "site"), os.path.join(ROOT, "scripts")]
-from locator_feature import make_catalog, normalize_locations
+from locator_feature import make_catalog, normalize_locations, public_sales_floor_locations
 from import_shelf_locations import prepare
 
 
@@ -80,6 +80,20 @@ class LocatorTests(unittest.TestCase):
         self.assertEqual(book["author"], "Solo Author")
         self.assertEqual(book["isbn"], "9781578633388")
         self.assertEqual(book["format"], "book")
+
+
+    def test_public_feed_never_exposes_backstock_codes(self):
+        verified = {
+            "1234": [
+                {"code":"A-01-01","kind":"sales-floor","verified_at":"2026-11-01"},
+                {"code":"BACK-22","kind":"backstock","verified_at":"2026-11-01"}
+            ],
+            "5678": [{"code":"BACK-10","kind":"backstock","verified_at":"2026-11-01"}]
+        }
+        public = public_sales_floor_locations(verified)
+        self.assertEqual(list(public), ["1234"])
+        self.assertEqual(public["1234"][0]["code"], "A-01-01")
+        self.assertNotIn("BACK-22", str(public))
 
 
 if __name__ == "__main__":
