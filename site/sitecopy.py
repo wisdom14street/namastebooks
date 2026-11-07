@@ -110,6 +110,8 @@ AISLES = {
  'art-design': ('Art & Design', 'Art & design', 'art-design-books', 'Visual references for paper, pattern, and design. These are not spiritual practice manuals.', '#5c4a6e'),
  'body-wellness': ('Bodywork, Health & Nutrition', 'Bodywork', 'bodywork-health-nutrition-books', 'Hands-on massage, nutrition, and other physical health programs. Energy-healing manuals stay on the energy shelf, and herbals stay with herbs.', '#3e6b5a'),
  'fiction': ('Fiction & Literature', 'Fiction', 'fiction-literature-books', 'Novels, short stories, and other literature. These are not spiritual practice manuals.', '#7a3a45'),
+ 'nature-environment': ('Nature & Environment', 'Nature', 'nature-environment-books', 'Climate, ecosystems, and community responses to the living world. A mindfulness book that only mentions the planet stays with its tradition.', '#1f6a62'),
+ 'poetry': ('Poetry', 'Poetry', 'poetry-books', 'Poems and verse. A book of poems is not filed as energy work because a line mentions energy.', '#6a3d5c'),
  'memoir-essays': ('Biography, Memoir & Essays', 'Memoir & essays', 'biography-memoir-essays-books', 'Biographies, memoirs, and essay collections that are not teachings of one tradition. A philosophy biography stays on the philosophy shelf.', '#5a5346'),
  'spanish':    ('Libros en Espa\u00f1ol', 'En espa\u00f1ol', 'libros-en-espanol', 'Spanish-language titles across the same subjects. Search still finds them by author or title.', '#b03a5b'),
  'journals':   ('Journals, Almanacs & Calendars', 'Journals', 'guided-journals-almanacs', 'Prompted journals, workbooks, yearly almanacs and wall calendars from book publishers, the kind you write in, read through or hang up for the year.', '#6a5a3a'),
@@ -143,7 +145,7 @@ def shelf_row(S, title, xs, href, link, sub=''):
     if len(xs) < 4: return ''
     return (f'<section class="wrap shelfsec"><div class="sechead"><h2>{E(title)}</h2><a href="{href}">{E(link)} &rarr;</a></div>{f"<p class=\"intro\">{sub}</p>" if sub else ""}'
             f'<div class="grid shelf">{"".join(S.card(x) for x in xs)}</div></section>')
-HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'mythology', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'feng-shui', 'journals', 'sets', 'spanish']
+HOME_ORDER = ['tarot', 'astrology', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'mythology', 'crystals', 'divination', 'energy', 'esoteric', 'self-help', 'angels', 'dreams', 'shamanism', 'herbs', 'religions', 'spirit', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry', 'feng-shui', 'journals', 'sets', 'spanish']
 def _dark(h, target=4.8):
     """Darken a hex colour until white text on it reaches the WCAG contrast target."""
     r, g, b = (int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
@@ -247,6 +249,8 @@ SHELF_LINE = {
  'body-wellness': 'It is on the bodywork, health, and nutrition shelf: practical care of the body, not energy healing or herb lore.',
  'fiction': 'It is literature: a novel or stories, not a spiritual practice manual.',
  'memoir-essays': 'It is on the biography, memoir, and essays shelf.',
+ 'nature-environment': 'It is on the nature and environment shelf: climate, land, and community, not a meditation manual.',
+ 'poetry': 'It is on the poetry shelf.',
  'spanish': 'Es un libro en espa\u00f1ol, en nuestra secci\u00f3n de libros en espa\u00f1ol.',
  'sets': 'It is a boxed set: a full book together with its own deck of cards.',
  'journals': 'Shelved with the guided journals and almanacs: a book meant to be written in or used through the year.',
