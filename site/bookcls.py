@@ -37,6 +37,9 @@ def book_kind(p):
 # Broad words (life, love, stone, planet, meditation-as-a-prefix, goddess, bare "magic") are not shelves by themselves.
 # Blurbs are not used: a passing mention was filing Aristotle under crystals and myth collections under witchcraft.
 TITLE_RULES = [
+ # Practical references that are not spiritual practice. These outrank a stray word such as "bible".
+ ('art-design', 12, r'\bjapanese papers\b'),
+ ('body-wellness', 12, r'\bmassage bible\b|\ba week to change your life\b'),
  ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
  ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
  ('astrology', 10, r'astrolog|zodiac|horoscope|birth chart|natal chart|\bsun signs?\b|\bmoon signs?\b|rising sign|jyotish|vedic astrology|mercury retrograde|moonology'),
@@ -95,7 +98,7 @@ TAG_RULES = {
  'divination': {'pendulum books'},
 }
 # More specific shelf wins a tie. Spirit is the leftover shelf, not a competing subject.
-TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'spirit']
+TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'spirit']
 _TITLE_RULES = [(s, w, re.compile(rx, re.I)) for s, w, rx in TITLE_RULES]
 _AUTHOR_RULES = [(s, re.compile(rx, re.I)) for s, rx in AUTHOR_RULES]
 _MYTH_SKIP = re.compile(r'\b(witch|wicca|pagans?|paganism|spells?|grimoires?|shamans?|shamanic)\b', re.I)
@@ -217,6 +220,7 @@ SHELF_KEYS = frozenset({
     'tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs',
     'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric',
     'religions', 'mythology', 'self-help', 'spirit', 'spanish', 'journals', 'sets',
+    'art-design', 'body-wellness',
 })
 _SHELF_TAG = re.compile(r'^nb-shelf:([a-z0-9-]+)$')
 

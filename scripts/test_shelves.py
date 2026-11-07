@@ -197,6 +197,25 @@ if sitecopy.category(_fake('Llewellyn Tarot Calendar 2027', ['nb-shelf:tarot'], 
 if reviewed_shelf(_fake('Tao Te Ching', ['nb-shelf:feng-shui'])) != 'feng-shui':
     fail('reviewed_shelf should return the tag key')
 
+def _shelf(title, tags=None, typ='books'):
+    return sitecopy.category(_fake(title, tags or [], typ))
+if _shelf('Japanese Papers (includes CD) by Varios autores') != 'art-design':
+    fail('Japanese Papers is an art reference, not a spiritual book')
+if _shelf('Massage Bible The Definitive Guide to Soothing Aches and Pains By Susan Mumford') != 'body-wellness':
+    fail('Massage Bible is physical massage, not religion or energy work')
+if _shelf('A Week to Change Your Life Harness the Power of Your Birthday and the 7-Day Cycle That Rules Your Health by Olivia Audrey') != 'body-wellness':
+    fail('A Week to Change Your Life is a health program, not a spiritual shelf')
+if _shelf('John Macmurray: A Biography by John E. Costello') != 'spirit':
+    fail('John Macmurray is a philosophy biography and stays on spirit')
+if _shelf('Reiki Bible: The Definitive Guide to Healing with Energy By Eleanor McKenzie') == 'body-wellness':
+    fail('a Reiki Bible is not the bodywork shelf')
+if _shelf('Yoga Bible By Christina Brown') == 'body-wellness':
+    fail('a yoga bible is not the bodywork shelf')
+if _shelf('Some Design Annual', ['nb-shelf:art-design']) != 'art-design':
+    fail('nb-shelf:art-design should be accepted')
+if _shelf('A Practical Nutrition Program', ['nb-shelf:body-wellness']) != 'body-wellness':
+    fail('nb-shelf:body-wellness should be accepted')
+
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
     for f in FAILS[:80]:
