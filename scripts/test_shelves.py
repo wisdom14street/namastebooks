@@ -387,6 +387,16 @@ if sitecopy.category(_verified('Everyday Oracle Deck', 8, '9780738743196', 'Orac
 franklin = _verified('The 13 Virtues of Benjamin Franklin', 7637433614414, '816667421986', 'books', [])
 if isbn_of(franklin):
     fail('the Franklin UPC is not an ISBN and is not mapped')
+if book_kind(_verified('Tarot Osho Zen By OSHO', 7842933375054, '9788484451761', 'Tarot Deck', ['nb-shelf:spanish'])) != 'set':
+    fail('the Spanish Osho Zen set is a book-and-card set')
+if sitecopy.category(_verified('Tarot Osho Zen By OSHO', 7842933375054, '9788484451761', 'Tarot Deck', ['nb-shelf:spanish'])) != 'spanish':
+    fail('the Spanish Osho Zen tag files it on the Spanish shelf')
+if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inayat Khan', 7842933473358, '9798888501825', 'Tarot Deck', ['nb-shelf:fiction'])) != 'fiction':
+    fail('Tears from the Mother of the Sun is a verified printed novella')
+if sitecopy.category(_verified('Torah in the Tarot by Stav Appel', 7884847710286, '9781961814301', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('Torah in the Tarot is a verified card set with a printed booklet')
+if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inayat Khan', 3, '9798888501825', 'Tarot Deck', ['nb-shelf:fiction'])) is not None:
+    fail('the novella ISBN does not include a different Tarot Deck product')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')

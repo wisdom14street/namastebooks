@@ -27,6 +27,8 @@ VERIFIED_BOOKS = {
     ('7842801680462', '9781803419947'),  # Many Veils of the Moon
     ('7842802303054', '9781803419961'),  # Palmistry of Fingerprints
     ('7842804465742', '9781637747636'),  # Your Anxiety Is Giving Me Anxiety
+    # Tears from the Mother of the Sun, a printed novella. Type is still Tarot Deck.
+    ('7842933473358', '9798888501825'),
 }
 # Card sets that include a substantial printed guidebook. Matched by product id and ISBN.
 # A plain deck is not included. The result is a book-and-deck set, not a standalone book.
@@ -35,6 +37,8 @@ VERIFIED_SETS = {
     ('7820721455182', '9798894141367'),  # Eras Tarot, deck and guidebook
     ('7842801320014', '9781923208186'),  # Japanese Gods & Spirits Oracle, cards plus a printed guidebook
     ('7842913812558', '9798337402154'),  # Dune Bene Gesserit, deck and guide
+    ('7842933375054', '9788484451761'),  # Tarot Osho Zen, Spanish cards plus a printed book
+    ('7884847710286', '9781961814301'),  # Torah in the Tarot, cards plus an explanatory booklet
 }
 def _pid_isbn(p):
     pid = str(p.get('id') or '')
