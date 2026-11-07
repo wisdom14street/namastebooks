@@ -45,6 +45,19 @@ Build reconciliation should store per-run counters:
 
 Keep a daily per-product ID / timestamp diff to identify newly visible, disappeared, out-of-stock, reclassified and added inventory. Log failures; never silently claim a stale feed is current.
 
+## Owner clarification (2026-11-07): Crystalshop never used Shopify POS
+
+The owner confirms Crystalshop operated on **a different POS system**, and its planned Shopify setup **was never completed**. The owner **does not want to set up Crystalshop on Shopify now**. Therefore:
+
+- Treat **Namaste Bookshop's Shopify inventory** as the sole operational catalog for this finder, and **Bookshop** as the sole customer-facing physical location.
+- The unused Shopify `Crystalshop` location is a configuration artifact, not evidence of operating Crystalshop inventory. Ignore it for Book Finder availability. Do not deactivate, delete, reassign or edit that Shopify location as part of this project.
+- Physical merchandise moved from the closed Crystalshop into Namaste Bookshop may already have been entered in Bookshop's Shopify inventory, or may still need to be entered; reconcile **only actual Bookshop merchandise** during the normal book/shelf audit.
+- **Do not** integrate the former Crystalshop POS, build a Crystalshop migration workflow, or imply a transfer from Crystalshop Shopify inventory is needed.
+- No need to ask the owner whether Shopify quantities were transferred from Crystalshop: that was an incorrect assumption.
+- Preserve ability to expand the physical locator to nonbook categories **already present in Bookshop Shopify** after book search is reliable.
+
+This clarification **supersedes** any earlier plan language about reconciling a Crystalshop Shopify transfer or treating Shopify's `Crystalshop` inventory as a second valid store.
+
 ## Owner correction (2026-11-07): Crystalshop is temporarily CLOSED
 
 - Namaste Crystalshop at 6 West 14th Street is **not open to customers at present**.
