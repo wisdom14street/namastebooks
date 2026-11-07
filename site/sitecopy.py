@@ -1,7 +1,7 @@
 """Namaste Books (namastebooks.com): a browsable bookstore for the spiritual, metaphysical and philosophy shelves of the
 Namaste inventory. Books only (plus true book-and-deck sets). Copy written for this site only."""
 import re, os, json, types, collections
-from bookcls import book_kind, shelf_of, split_author, is_isbn, is_spanish_title, off_topic, reviewed_shelf, SHELF_KEYS
+from bookcls import book_kind, shelf_of, split_author, is_spanish_title, off_topic, reviewed_shelf, SHELF_KEYS, isbn_of
 E = __import__('html').escape
 ICON = 'book'
 FAM_LABEL, FAM_ALL, STYLE_LABEL, STYLE_ALL = 'Kind of book', 'Every kind', 'Edition', 'All editions'
@@ -26,15 +26,14 @@ def publisher_name(vendor):
 def category(p):
     k = book_kind(p)
     if not k: return None
-    t = p['title']; sku = (p['variants'][0].get('sku') or '').strip()
+    t = p['title']
     reviewed = reviewed_shelf(p)
     if k == 'book' and off_topic(t) and not reviewed: return None
     short, author = split_author(t)
     if not author:
         m = re.search(r'\s[-\u2013]\s([A-Z][\w.\' ]{3,38})$', t)   # "Title - Author" style
         if m and len(m.group(1).split()) <= 4: short, author = t[:m.start()].strip(), m.group(1).strip()
-    sku_n = re.sub(r'[^0-9Xx]', '', sku).upper()
-    isbn = sku if is_isbn(sku) else (sku_n if is_isbn(sku_n) else '')
+    isbn = isbn_of(p)
     ty = (p.get('product_type') or '').strip().lower()
     kind = 'video' if ty in ('dvd', 'spiritual dvd') else 'audio' if ty == 'audio course' else k
     if reviewed:

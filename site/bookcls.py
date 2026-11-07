@@ -23,6 +23,20 @@ def _pid_isbn(p):
     if '/' in pid: pid = pid.rsplit('/', 1)[-1]
     sku = re.sub(r'[^0-9Xx]', '', (p['variants'][0].get('sku') or '') if p.get('variants') else '').upper()
     return pid, sku
+# The catalog feed has no barcode field. This stock code is a UPC, matched with the product id.
+# The value is the verified ISBN. A 12-digit UPC is never treated as an ISBN by itself.
+VERIFIED_ISBN = {
+    ('7639974641742', '824297633389'): '9781578633388',
+}
+def isbn_of(p):
+    """ISBN for this product. A verified id-and-SKU pair wins; otherwise only an ISBN-shaped SKU."""
+    pid, sku = _pid_isbn(p)
+    hit = VERIFIED_ISBN.get((pid, sku))
+    if hit: return hit
+    raw = ((p.get('variants') or [{}])[0].get('sku') or '').strip()
+    if is_isbn(raw): return raw
+    if is_isbn(sku): return sku
+    return ''
 def book_kind(p):
     """'book', 'set' (book-and-deck set) or None"""
     if _pid_isbn(p) in VERIFIED_BOOKS: return 'book'

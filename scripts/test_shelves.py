@@ -9,7 +9,7 @@ from collections import Counter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path[:0] = [os.path.join(ROOT, 'scripts'), os.path.join(ROOT, 'site')]
 import sitecopy
-from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES, reviewed_shelf, SHELF_KEYS
+from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES, reviewed_shelf, SHELF_KEYS, is_isbn, isbn_of
 
 RAW = json.load(open(os.path.join(ROOT, 'data', 'all_products.json')))
 FAILS = []
@@ -302,6 +302,29 @@ if sitecopy.category(wrong_isbn) is not None:
     fail('the It\'s All Magic product id is not enough without its ISBN')
 if _shelf('The First Female Pharaoh: Sobekneferu, Goddess of the Seven Stars by Andrew Collins', ['nb-shelf:history-culture-travel']) != 'history-culture-travel':
     fail('a reviewed history tag should file First Female Pharaoh on history')
+if is_isbn('824297633389'):
+    fail('a 12-digit UPC is not an ISBN')
+arcana = _fake('The Arcana of Freemasonry: A History of Masonic Signs and Symbols by Albert Churchward', ['nb-shelf:esoteric'])
+arcana['id'] = 7639974641742
+arcana['handle'] = 'arcana-fixture'
+arcana['variants'][0]['sku'] = '824297633389'
+if sitecopy.category(arcana) != 'esoteric':
+    fail('Arcana of Freemasonry is already a book from its type and belongs on esoteric')
+if sitecopy.INFO['arcana-fixture']['isbn'] != '9781578633388':
+    fail('the verified ISBN should be recorded for the Arcana UPC stock code')
+other_upc = _fake('The Arcana of Freemasonry: A History of Masonic Signs and Symbols by Albert Churchward', ['nb-shelf:esoteric'])
+other_upc['id'] = 99
+other_upc['handle'] = 'other-upc-fixture'
+other_upc['variants'][0]['sku'] = '824297633389'
+if sitecopy.category(other_upc) != 'esoteric' or sitecopy.INFO['other-upc-fixture']['isbn']:
+    fail('the same UPC on another product is not given this ISBN')
+upc_deck = _fake('Everyday Oracle Deck', ['nb-shelf:esoteric'], typ='Oracle Cards')
+upc_deck['id'] = 7639974641742
+upc_deck['variants'][0]['sku'] = '824297633389'
+if sitecopy.category(upc_deck) is not None:
+    fail('the verified ISBN pair does not turn a deck into a book')
+if isbn_of(other_upc):
+    fail('isbn_of should ignore a UPC that is not the verified pair')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
