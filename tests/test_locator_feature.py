@@ -60,5 +60,16 @@ class LocatorTests(unittest.TestCase):
         self.assertEqual(merged["1234"][0]["code"], "A-04-02")
 
 
+    def test_import_preserves_multiple_verified_sales_floor_locations(self):
+        rows = [
+            {"product_id":"1234", "code":"A-04-02", "kind":"sales-floor", "verified_at":"2026-11-01"},
+            {"product_id":"1234", "code":"B-01-03", "kind":"sales-floor", "verified_at":"2026-11-01"},
+        ]
+        merged, accepted, skipped = prepare(rows, {"1234"}, {})
+        self.assertEqual(accepted, 2)
+        self.assertFalse(skipped)
+        self.assertEqual({x["code"] for x in merged["1234"]}, {"A-04-02", "B-01-03"})
+
+
 if __name__ == "__main__":
     unittest.main()
