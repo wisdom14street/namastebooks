@@ -71,5 +71,16 @@ class LocatorTests(unittest.TestCase):
         self.assertEqual({x["code"] for x in merged["1234"]}, {"A-04-02", "B-01-03"})
 
 
+    def test_catalog_keeps_single_title_author_and_verified_isbn(self):
+        self.book["brand"] = ""
+        book = make_catalog(
+            [self.book], {"buddhism": ("Buddhism",)}, {},
+            {"example-book": {"author": "Solo Author", "isbn": "9781578633388", "kind": "book"}}
+        )[0]
+        self.assertEqual(book["author"], "Solo Author")
+        self.assertEqual(book["isbn"], "9781578633388")
+        self.assertEqual(book["format"], "book")
+
+
 if __name__ == "__main__":
     unittest.main()
