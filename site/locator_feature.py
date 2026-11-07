@@ -121,7 +121,7 @@ def publish(page, root, dist, products, aisles, authors, site):
         'It does not update Shopify, the public book finder, or other staff devices. Export your CSV after every session.</p></header>'
         '<section class="loc-tool"><label for="loc-shelf">Physical location code, for example A-04-02</label>'
         '<input id="loc-shelf" autocomplete="off" placeholder="SECTION-BAY-LEVEL" maxlength="24">'
-        '<label for="loc-sku">Scan or type ISBN, SKU, or Shopify product ID</label>'
+        '<label for="loc-sku">Scan an ISBN/SKU, enter a Shopify product ID, or search by title</label>'
         '<input id="loc-sku" autocomplete="off" inputmode="text" placeholder="Scan barcode; press Enter">'
         '<p id="loc-staff-status" role="status" aria-live="polite"></p>'
         '<div id="loc-staff-matches"></div><h2>Saved on this device</h2><div id="loc-staff-assignments"></div>'
