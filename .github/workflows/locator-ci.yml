@@ -1,0 +1,54 @@
+name: Physical book finder checks
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/build.py'
+      - 'scripts/import_shelf_locations.py'
+      - 'site/locator_feature.py'
+      - 'site/physical_locations.json'
+      - 'src/assets/locator.js'
+      - 'src/assets/locator.css'
+      - 'tests/test_locator_feature.py'
+      - '.github/workflows/locator-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test verified physical shelf logic
+        run: python3 -m unittest discover -s tests -v
+      - name: Check JavaScript syntax
+        run: node --check src/assets/locator.js
+      - name: Fetch public Shopify catalog
+        run: python3 scripts/fetch.py
+      - name: Run existing subject-shelf checks
+        run: python3 scripts/test_shelves.py
+      - name: Build all pages with bookstore's real published catalog
+        run: python3 scripts/build.py --preview
+      - name: Verify finder artifacts, no invented physical shelf data
+        run: |
+          test -s dist/find/index.html
+          test -s dist/kiosk/index.html
+          test -s dist/staff/shelf-scan/index.html
+          test -s dist/data/locator-catalog.json
+          test -s dist/data/physical-locations.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          catalog=json.loads(Path('dist/data/locator-catalog.json').read_text())
+          locations=json.loads(Path('dist/data/physical-locations.json').read_text())
+          assert len(catalog['books']) == catalog['count'] > 2000
+          assert locations['verified_product_count'] == 0
+          assert not locations['items'], 'No shelf should be invented'
+          print('Book finder build verified:', catalog['count'], 'catalog entries')
+          PY
