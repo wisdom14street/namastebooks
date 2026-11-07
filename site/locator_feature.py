@@ -44,6 +44,17 @@ def normalize_locations(source, known_ids):
     return valid
 
 
+
+def public_sales_floor_locations(verified):
+    """Never expose backstock or staff-only placements in the public finder feed."""
+    out = {}
+    for product_id, entries in verified.items():
+        floor = [x for x in entries if x["kind"] == "sales-floor"]
+        if floor:
+            out[product_id] = floor
+    return out
+
+
 def make_catalog(products, aisles, authors, infos=None):
     """Each Shopify product ID stays distinct even if shop cards group editions."""
     rows = []
@@ -76,7 +87,8 @@ def publish(page, root, dist, products, aisles, authors, site, infos=None):
     locations_path = os.path.join(root, "site", "physical_locations.json")
     with open(locations_path, encoding="utf-8") as f:
         raw_locations = json.load(f)
-    locations = normalize_locations(raw_locations, {x["id"] for x in rows})
+    all_locations = normalize_locations(raw_locations, {x["id"] for x in rows})
+    locations = public_sales_floor_locations(all_locations)
     today = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="minutes")
     with open(os.path.join(dist, "data", "locator-catalog.json"), "w", encoding="utf-8") as f:
         json.dump({"count": len(rows), "built_at": today, "books": rows}, f, ensure_ascii=False, separators=(",", ":"))
