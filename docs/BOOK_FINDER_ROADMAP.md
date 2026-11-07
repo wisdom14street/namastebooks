@@ -45,6 +45,18 @@ Build reconciliation should store per-run counters:
 
 Keep a daily per-product ID / timestamp diff to identify newly visible, disappeared, out-of-stock, reclassified and added inventory. Log failures; never silently claim a stale feed is current.
 
+## Owner correction (2026-11-07): Crystalshop is temporarily CLOSED
+
+- Namaste Crystalshop at 6 West 14th Street is **not open to customers at present**.
+- Many Crystalshop products have already been physically brought into and integrated with Namaste Bookshop at 2 West 14th Street.
+- Shopify still shows both locations active and fulfilling online orders, but that configuration must **not** be interpreted as proof that Crystalshop is open or that merchandise remains there.
+- Customer-facing finder, pickup and kiosk must point to **Namaste Bookshop only** until the owner explicitly reopens another location.
+- Do not automatically deactivate the Crystalshop Shopify location or bulk-transfer stock: the owner has not confirmed whether inventory quantities were already reallocated in Shopify, and those changes could break fulfillment, accounting and stock.
+- Create a **transfer reconciliation** report for products/variants: Bookshop available quantity, Crystalshop available quantity, physical scan/observed Bookshop quantity, whether product moved, whether Shopify transfer was recorded, and review status.
+- Never promise physical availability from Shopify aggregate online stock; distinguish **in Shopify**, **recorded at Bookshop**, **physically verified on sales floor**, **not yet verified**.
+- Begin with books to address lost sales, but make location/placement schema reusable for crystals, decks, incense and all other merged merchandise.
+- If Crystalshop reopens, make its customer-facing status an explicit owner-controlled setting, not an inference from Shopify's `isActive` field.
+
 ## Verified Shopify stock locations — decisive constraint
 
 Read-only Shopify Admin lookup on 2026-11-07 confirmed TWO active fulfillment locations:
