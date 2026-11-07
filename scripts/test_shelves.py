@@ -343,6 +343,29 @@ if _shelf('Tao Te Ching by Lao Tzu') == 'strategy-leadership':
     fail('the Tao Te Ching stays off the strategy shelf')
 if _shelf('A Leadership Handbook', ['nb-shelf:strategy-leadership']) != 'strategy-leadership':
     fail('nb-shelf:strategy-leadership should be accepted')
+if _shelf('The Art of War by Sun Tzu (Penguin Classics edition edited and translated by John Minford)', ['nb-shelf:strategy-leadership']) != 'strategy-leadership':
+    fail('the Minford Penguin Classics tag should file it on strategy')
+if _shelf('The Art of War by Sun Tzu (Penguin Classics edition edited and translated by John Minford)') != 'feng-shui':
+    fail('without its tag, the Penguin Classics Art of War keeps the existing Taoism rule')
+def _verified(title, pid, sku, typ, tags):
+    p = _fake(title, tags, typ=typ)
+    p['id'] = pid
+    p['variants'][0]['sku'] = sku
+    return p
+if sitecopy.category(_verified('Tarot: Unlocking the Arcana by Angelo Nasios', 7640127078478, '9780764350375', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('Unlocking the Arcana is a verified printed guide, not dropped as a deck')
+if sitecopy.category(_verified('White Light Tarot by Jessica Fisher-Willson', 7640013733966, '9780982483923', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('White Light Tarot is a verified printed guide')
+if sitecopy.category(_verified('The True Nature of Tarot by Diane Wing', 7640013078606, '9781615990214', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
+    fail('The True Nature of Tarot is a verified printed guide')
+if sitecopy.category(_verified('Tarot of Love: A Companion Guide to the Tarot of Love Deck by Gayan Sylvie Winter', 7639911891022, '9780880795210', 'Home Decor', ['nb-shelf:tarot'])) != 'tarot':
+    fail('Tarot of Love is a verified printed companion, not dropped for the word Deck')
+if sitecopy.category(_verified('Tarot: Unlocking the Arcana by Angelo Nasios', 50, '9780764350375', 'Tarot Deck', ['nb-shelf:tarot'])) is not None:
+    fail('a deck is not included because its ISBN matches a verified guide')
+if sitecopy.category(_verified('Oracle of the 7 Energies Journal by Colette Baron-Reid', 7640535662670, '9781401962913', 'Journal', ['nb-shelf:journals'])) != 'journals':
+    fail('a guided journal with an ISBN stays on the journal shelf')
+if sitecopy.category(_verified('Blank Notebook', 7640535662670, '9781401962913', '', [])) is not None:
+    fail('the journal ISBN does not turn a blank notebook into a book')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')

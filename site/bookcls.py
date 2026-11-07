@@ -17,6 +17,12 @@ VERIFIED_BOOKS = {
     ('7640120852558', '9781618521248'),
     # It's All Magic, a printed book of daily reflections. Legacy type is Tarot Deck.
     ('7639463460942', '9781401978693'),
+    # Printed tarot guides whose Shopify type is still Tarot Deck.
+    ('7640127078478', '9780764350375'),  # Tarot: Unlocking the Arcana
+    ('7640013733966', '9780982483923'),  # White Light Tarot
+    ('7640013078606', '9781615990214'),  # The True Nature of Tarot
+    # Tarot of Love, a printed companion. Type is Home Decor and the title names a deck.
+    ('7639911891022', '9780880795210'),
 }
 def _pid_isbn(p):
     pid = str(p.get('id') or '')
