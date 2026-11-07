@@ -44,31 +44,35 @@ def normalize_locations(source, known_ids):
     return valid
 
 
-def make_catalog(products, aisles, authors):
+def make_catalog(products, aisles, authors, infos=None):
     """Each Shopify product ID stays distinct even if shop cards group editions."""
     rows = []
     seen = set()
+    infos = infos or {}
     for x in products:
         pid = str(x["id"])
         if pid in seen:
             continue
         seen.add(pid)
+        info = infos.get(x["handle"], {})
         skus = sorted({str(v.get("sku") or "").strip() for v in x.get("variants", []) if v.get("sku")})
         cover = x["images"][0]
         if cover.startswith("https://") and "width=" not in cover:
             cover += ("&" if "?" in cover else "?") + "width=280"
         rows.append({
             "id": pid, "handle": x["handle"], "title": x["dtitle"],
-            "author": authors.get(x["brand"], "") if x.get("brand") else "",
+            "author": info.get("author") or (authors.get(x["brand"], "") if x.get("brand") else ""),
             "subject": aisles[x["aisle"]][0],
+            "isbn": info.get("isbn") or "",
+            "format": info.get("kind") or "book",
             "sku": skus, "cover": cover, "price": x["price"],
             "created_at": x.get("created", "")[:10],
         })
     return rows
 
 
-def publish(page, root, dist, products, aisles, authors, site):
-    rows = make_catalog(products, aisles, authors)
+def publish(page, root, dist, products, aisles, authors, site, infos=None):
+    rows = make_catalog(products, aisles, authors, infos)
     locations_path = os.path.join(root, "site", "physical_locations.json")
     with open(locations_path, encoding="utf-8") as f:
         raw_locations = json.load(f)
