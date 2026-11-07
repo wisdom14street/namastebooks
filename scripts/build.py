@@ -624,7 +624,7 @@ page('/404.html', f'Page not found | {BRAND}', 'Page not found', f'<section clas
 
 # ---- customer finder, kiosk and staff shelf mapping pilot ----
 from locator_feature import publish as publish_locator
-LOCATOR_SUMMARY = publish_locator(page, ROOT, DIST, products, AISLES, BR.NAME, SITE)
+LOCATOR_SUMMARY = publish_locator(page, ROOT, DIST, products, AISLES, BR.NAME, SITE, C.INFO)
 
 # ---- sitemap / robots / CNAME ----
 open(os.path.join(DIST, '.nojekyll'), 'w').write('')
