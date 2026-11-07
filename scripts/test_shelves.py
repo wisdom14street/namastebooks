@@ -257,6 +257,30 @@ deck['id'] = 999
 deck['variants'][0]['sku'] = '9781646710508'
 if sitecopy.category(deck) is not None:
     fail('a deck is not included just because the ISBN matches a verified book')
+if _shelf('The Perfumed Garden by Captain Sir Richard F. Burton') != 'sexuality-relationships':
+    fail('The Perfumed Garden is sexuality and relationship literature')
+if _shelf('The Perfumed Garden by Captain Sir Richard F. Burton') in ('self-help', 'religions'):
+    fail('The Perfumed Garden is not self-help or world religions')
+if _shelf('Luminous Kashi to Vibrant Varanasi by K. Chandramouli') != 'history-culture-travel':
+    fail('Luminous Kashi is history, culture, and travel')
+if _shelf('Bhagavad Gita by Vyasa') == 'history-culture-travel':
+    fail('a scripture stays with its tradition')
+if _shelf('A Field Guide to Love', ['nb-shelf:sexuality-relationships']) != 'sexuality-relationships':
+    fail('nb-shelf:sexuality-relationships should be accepted')
+if _shelf('A City History', ['nb-shelf:history-culture-travel']) != 'history-culture-travel':
+    fail('nb-shelf:history-culture-travel should be accepted')
+discovery = _fake('Discovery Tarot Path: A New Model for Self-Reading with the Rider-Waite-Smith Deck By Stephanie Leon Neal', ['nb-shelf:tarot'])
+discovery['id'] = 7640120852558
+discovery['product_type'] = ''
+discovery['variants'][0]['sku'] = '9781618521248'
+if sitecopy.category(discovery) != 'tarot':
+    fail('the verified Discovery Tarot Path paperback should be included on tarot')
+same_title = _fake('Discovery Tarot Path: A New Model for Self-Reading with the Rider-Waite-Smith Deck By Stephanie Leon Neal', ['nb-shelf:tarot'])
+same_title['id'] = 1
+same_title['product_type'] = ''
+same_title['variants'][0]['sku'] = '9781618521248'
+if sitecopy.category(same_title) is not None:
+    fail('the same title is not included without the verified product id')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
