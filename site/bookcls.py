@@ -8,8 +8,20 @@ SETOK = re.compile(r'(?<!guide)book ?(and|&|/) ?(deck|cards)|(deck|cards) ?(and|
 JOURNAL = re.compile(r'\bjournal\b|workbook|guided prompts|prompt book', re.I)
 NOTBOOK = re.compile(r'reading with|\bmins?\b|minute reading|calendar|bookmark|book ?end|bookstand|book stand|journal|notebook|candle|incense|bracelet|necklace|pendant|\bring\b|crystal tumbled|statue|pouch|bag\b|calendar 20', re.I)
 def is_isbn(s): return bool(re.fullmatch(r'97[89]\d{10}', s or '')) or bool(re.fullmatch(r'\d{9}[\dX]', s or ''))
+# Books whose Shopify type is blank or wrong, confirmed by product id and ISBN together.
+# An nb-shelf tag is not enough: decks, charts, and blank notebooks carry that tag too.
+VERIFIED_BOOKS = {
+    # Reading Fortune Telling Cards, a cartomancy guide. Type is blank; the title ends in "Deck".
+    ('7640001380430', '9781646710508'),
+}
+def _pid_isbn(p):
+    pid = str(p.get('id') or '')
+    if '/' in pid: pid = pid.rsplit('/', 1)[-1]
+    sku = re.sub(r'[^0-9Xx]', '', (p['variants'][0].get('sku') or '') if p.get('variants') else '').upper()
+    return pid, sku
 def book_kind(p):
     """'book', 'set' (book-and-deck set) or None"""
+    if _pid_isbn(p) in VERIFIED_BOOKS: return 'book'
     t, ty = p['title'], (p.get('product_type') or '').strip().lower()
     sku = (p['variants'][0].get('sku') or '').strip()
     if ty in ('tarot deck','oracle cards','oracle deck','lenormand deck','mini deck','affirmation deck','tarot set','tarot kit','celtic oracle deck','dream oracle deck','astrology oracle deck','inspirational cards','affirmation cards','inspiration cards','collectable cards','playing cards'):
@@ -41,6 +53,8 @@ TITLE_RULES = [
  ('art-design', 12, r'\bjapanese papers\b'),
  ('body-wellness', 12, r'\bmassage bible\b|\ba week to change your life\b|^stretching anatomy\b|^pilates (anatomy|body|for everyone)\b|\btrim healthy mama\b'),
  ('fiction', 12, r'\bland of stories\b|short stories from the age of queen victoria|endless apocalypse short stories|^until august\b|\bhellboy\b|history of horror, fear, and the uncanny'),
+ ('nature-environment', 12, r'\bclimate courage\b'),
+ ('poetry', 12, r'\boceans of thoughts\b'),
  ('memoir-essays', 12, r'\ba point of beauty\b'),
  ('tarot', 10, r'\btarot\b|major arcana|minor arcana|rider[\s-]waite|medicine woman inner guidebook'),
  ('divination', 10, r'\blenormand\b|\brunes?\b|\bpendulums?\b|\bi ching\b|\byi jing\b|numerolog|palmistry|palm reading|\boracles?\b|\bdivination\b|tea[\s-]leaves?|scrying|\bdowsing\b|geomancy|clairvoyan|cartomancy|psychometr|\bpsychic\b|mediumship|mind[\s-]reading|psychomancy|crystal gazing|\bcayce\b|messages in the numbers|beyond the veil'),
@@ -100,7 +114,7 @@ TAG_RULES = {
  'divination': {'pendulum books'},
 }
 # More specific shelf wins a tie. Spirit is the leftover shelf, not a competing subject.
-TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'spirit']
+TIE_ORDER = ['tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs', 'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric', 'religions', 'mythology', 'self-help', 'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry', 'spirit']
 _TITLE_RULES = [(s, w, re.compile(rx, re.I)) for s, w, rx in TITLE_RULES]
 _AUTHOR_RULES = [(s, re.compile(rx, re.I)) for s, rx in AUTHOR_RULES]
 _MYTH_SKIP = re.compile(r'\b(witch|wicca|pagans?|paganism|spells?|grimoires?|shamans?|shamanic)\b', re.I)
@@ -213,7 +227,7 @@ SHELF_KEYS = frozenset({
     'tarot', 'astrology', 'divination', 'crystals', 'dreams', 'angels', 'energy', 'herbs',
     'shamanism', 'witchcraft', 'buddhism', 'meditation', 'hindu-yoga', 'feng-shui', 'esoteric',
     'religions', 'mythology', 'self-help', 'spirit', 'spanish', 'journals', 'sets',
-    'art-design', 'body-wellness', 'fiction', 'memoir-essays',
+    'art-design', 'body-wellness', 'fiction', 'memoir-essays', 'nature-environment', 'poetry',
 })
 _SHELF_TAG = re.compile(r'^nb-shelf:([a-z0-9-]+)$')
 

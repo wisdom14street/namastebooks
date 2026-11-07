@@ -236,6 +236,27 @@ if _shelf('Essays Someone Reviewed', ['nb-shelf:memoir-essays']) != 'memoir-essa
     fail('nb-shelf:memoir-essays should be accepted')
 if _shelf('Hellboy Seed Of Destruction') != 'fiction':
     fail('Hellboy is a book and belongs on fiction')
+if _shelf('Climate Courage: How Tackling Climate Change Can Build Community by Andreas Karelas') != 'nature-environment':
+    fail('Climate Courage is nature and environment, not a spiritual shelf')
+if _shelf('Oceans of Thoughts Book One: An Inspirational Walk through the Inner Self by Rosalind Severin McClean') != 'poetry':
+    fail('Oceans of Thoughts is poetry')
+if _shelf('Zen and the Art of Saving the Planet by Thich Nhat Hanh') == 'nature-environment':
+    fail('a mindfulness book about the planet stays with its tradition')
+if _shelf('A Field Guide', ['nb-shelf:nature-environment']) != 'nature-environment':
+    fail('nb-shelf:nature-environment should be accepted')
+if _shelf('Selected Poems', ['nb-shelf:poetry']) != 'poetry':
+    fail('nb-shelf:poetry should be accepted')
+cartomancy = _fake('Reading Fortune Telling Cards Book: A Romani Approach Featuring the Gypsy Witch Deck by Fabio Vinago', ['nb-shelf:divination'])
+cartomancy['id'] = 7640001380430
+cartomancy['product_type'] = ''
+cartomancy['variants'][0]['sku'] = '9781646710508'
+if sitecopy.category(cartomancy) != 'divination':
+    fail('the verified cartomancy guide should be included on divination')
+deck = _fake('Everyday Tarot Deck', ['nb-shelf:tarot'], typ='Tarot Deck')
+deck['id'] = 999
+deck['variants'][0]['sku'] = '9781646710508'
+if sitecopy.category(deck) is not None:
+    fail('a deck is not included just because the ISBN matches a verified book')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
