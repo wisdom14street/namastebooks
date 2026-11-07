@@ -51,7 +51,10 @@ for p, shelf in kept:
     ty = (p.get('product_type') or '').strip().lower()
     kinds[ty] += 1
     if not p.get('images'): nophoto += 1
-    if ty == 'almanacs & calendars' and shelf != 'journals':
+    reviewed = reviewed_shelf(p)
+    if reviewed and shelf != reviewed:
+        fail(f'reviewed tag {reviewed} was not kept: {p["title"][:100]} -> {shelf}')
+    if ty == 'almanacs & calendars' and not reviewed and shelf != 'journals':
         fail(f'calendar not on the journal shelf: {p["title"][:120]} -> {shelf}')
     if ty in ('dvd', 'spiritual dvd', 'audio course') and not shelf:
         fail(f'missing av title: {p["title"][:120]}')
@@ -78,14 +81,18 @@ rows = subject_rows()
 
 def expect(rx, shelf, why):
     rx = re.compile(rx, re.I)
-    for got, short, full in rows:
-        if rx.search(short) and got != shelf:
-            fail(f'{why}: {full[:130]} -> {got}, expected {shelf}')
+    for p, got in kept:
+        if reviewed_shelf(p): continue
+        if got in ('spanish', 'journals', 'sets'): continue
+        if rx.search(short_title(p['title'])) and got != shelf:
+            fail(f'{why}: {p["title"][:130]} -> {got}, expected {shelf}')
 
 def expect_head(rx, shelf, why):
-    """The subject has to be in the main title. A subtitle mention does not decide the shelf."""
+    """The subject has to be in the main title. A subtitle mention does not decide the shelf.
+    A reviewed nb-shelf tag is allowed to choose a different shelf."""
     rx = re.compile(rx, re.I)
     for p, got in kept:
+        if reviewed_shelf(p): continue
         if got in ('spanish', 'journals', 'sets'): continue
         head, _ = title_parts(p['title'])
         if rx.search(head) and got != shelf:
@@ -126,13 +133,13 @@ for p, shelf in kept:
     if shelf in ('spanish', 'journals', 'sets'): continue
     head, sub = title_parts(p['title'])
     low = p['title'].lower()
-    if low.startswith('herbal magick') and shelf != 'herbs':
+    if low.startswith('herbal magick') and not reviewed_shelf(p) and shelf != 'herbs':
         fail(f'Herbal Magick belongs with herbs, not {shelf}')
     if 'women who run with the wolves' in low and shelf != 'mythology':
         fail(f'Women Who Run with the Wolves is a myth collection, not {shelf}')
     if 'guide to divination' in head.lower() and shelf != 'divination':
         fail(f'a divination guide belongs on divination, not {shelf}: {p["title"][:100]}')
-    if shelf != 'mythology' or not sub or _MYTH_WORD.search(head): continue
+    if reviewed_shelf(p) or shelf != 'mythology' or not sub or _MYTH_WORD.search(head): continue
     if any(s != 'mythology' and w >= 8 and rx.search(head) for s, w, rx in _TITLE_RULES):
         fail(f'subtitle put this on Myths: {p["title"][:140]}')
 
@@ -159,11 +166,11 @@ MUST_CONTAIN = [
     ('celtic tales', 'mythology'),
     ('hands of light', 'energy'),
 ]
-lookup = [(p['title'].lower(), shelf) for p, shelf in kept]
+lookup = [(p['title'].lower(), shelf) for p, shelf in kept if not reviewed_shelf(p)]
 for needle, shelf in MUST_CONTAIN:
     hits = [s for t, s in lookup if needle in t]
     if not hits:
-        print(f'  (not in stock) {needle}')
+        print(f'  (reviewed or not in stock) {needle}')
         continue
     if shelf not in hits:
         fail(f'{needle!r} in stock but not on {shelf}: {set(hits)}')
