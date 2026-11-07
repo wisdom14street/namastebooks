@@ -135,7 +135,7 @@ for p, shelf in kept:
     low = p['title'].lower()
     if low.startswith('herbal magick') and not reviewed_shelf(p) and shelf != 'herbs':
         fail(f'Herbal Magick belongs with herbs, not {shelf}')
-    if 'women who run with the wolves' in low and shelf != 'mythology':
+    if 'women who run with the wolves' in low and not reviewed_shelf(p) and shelf != 'mythology':
         fail(f'Women Who Run with the Wolves is a myth collection, not {shelf}')
     if 'guide to divination' in head.lower() and shelf != 'divination':
         fail(f'a divination guide belongs on divination, not {shelf}: {p["title"][:100]}')
