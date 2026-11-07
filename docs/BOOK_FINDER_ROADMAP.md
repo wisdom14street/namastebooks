@@ -45,6 +45,16 @@ Build reconciliation should store per-run counters:
 
 Keep a daily per-product ID / timestamp diff to identify newly visible, disappeared, out-of-stock, reclassified and added inventory. Log failures; never silently claim a stale feed is current.
 
+## Verified Shopify stock locations — decisive constraint
+
+Read-only Shopify Admin lookup on 2026-11-07 confirmed TWO active fulfillment locations:
+- **Bookshop**: `gid://shopify/Location/74879041614`, **2 West 14th Street, New York, NY 10011**
+- **Crystalshop**: `gid://shopify/Location/74884939854`, **6 West 14th Street, New York, NY 10011**
+
+Both have `fulfillsOnlineOrders=true`. General online availability can aggregate across locations and must **never** be labeled "available at Bookshop." For real in-store stock, read a product variant's inventory item and inventory levels for **Bookshop** specifically. Display separate public statuses for (1) online listing, (2) stock verified at the Bookshop fulfillment location, (3) physically mapped sales-floor location. Publish neither staff/backroom quantities nor staff identities. On-location spot checks remain necessary even when Shopify shows a positive Bookshop quantity.
+
+A read-only sample of 40 available `Books` products had positive Bookshop quantities; this sample does **not** establish whether the full book catalog includes Crystalshop-only stock.
+
 ## Phase 0: Existing integration verified
 
 - `scripts/fetch.py` reads only published products from Shopify public products.json;
