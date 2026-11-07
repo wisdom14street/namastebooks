@@ -325,6 +325,24 @@ if sitecopy.category(upc_deck) is not None:
     fail('the verified ISBN pair does not turn a deck into a book')
 if isbn_of(other_upc):
     fail('isbn_of should ignore a UPC that is not the verified pair')
+cleary = 'The Art of War by Sun Tzu (translated by Thomas Cleary)'
+minford = 'The Art of War by Sun Tzu (Penguin Great Ideas edition, translated by John Minford)'
+if _shelf(cleary) != 'strategy-leadership':
+    fail('the Cleary Art of War is strategy and leadership, not Taoism')
+if _shelf(minford) != 'strategy-leadership':
+    fail('the Minford Great Ideas Art of War is strategy and leadership')
+if _shelf(cleary) in ('self-help', 'religions', 'feng-shui'):
+    fail('the confirmed Art of War editions are not self-help, religion, or the Taoism shelf')
+if _shelf('The Art of War by Sun Tzu') != 'feng-shui':
+    fail('an unreviewed Art of War title keeps the existing Taoism rule')
+if _shelf('Art of War by Sun Tzu (Thomas Cleary translation — Denma edition)') == 'strategy-leadership':
+    fail('the unreviewed Denma edition is not assumed onto strategy')
+if _shelf('The Modern Art of War: Sun Tzu’s Hidden Path to Peace and Wholeness by Hunter Liguore') == 'strategy-leadership':
+    fail('Modern Art of War is not reviewed and is not assumed onto strategy')
+if _shelf('Tao Te Ching by Lao Tzu') == 'strategy-leadership':
+    fail('the Tao Te Ching stays off the strategy shelf')
+if _shelf('A Leadership Handbook', ['nb-shelf:strategy-leadership']) != 'strategy-leadership':
+    fail('nb-shelf:strategy-leadership should be accepted')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
