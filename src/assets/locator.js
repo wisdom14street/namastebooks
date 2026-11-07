@@ -201,10 +201,25 @@
       const entries = Object.values(drafts).sort((a,b) => b.verified_at.localeCompare(a.verified_at)).slice(0, 60);
       box.replaceChildren();
       box.appendChild(elt('p', 'loc-small', Object.keys(drafts).length + ' unique book assignments saved locally'));
-      entries.forEach(row => box.appendChild(elt('p', 'loc-draft', row.code + ' · ' + row.title + ' · ' + row.product_id)));
+      entries.forEach(row => {
+        const line = elt('div', 'loc-draft-row');
+        line.appendChild(elt('p', 'loc-draft', row.code + ' · ' + row.title + ' · ' + row.product_id));
+        const remove = elt('button', 'loc-remove', 'Remove');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', 'Remove local draft placement for ' + row.title + ' at ' + row.code);
+        remove.addEventListener('click', () => {
+          if (!confirm('Remove this local draft placement?')) return;
+          delete drafts[row.product_id + '|' + row.code + '|' + row.kind];
+          persist();
+          renderDrafts();
+        });
+        line.appendChild(remove);
+        box.appendChild(line);
+      });
     };
     const set = (book, code) => {
-      drafts[book.id] = {
+      const key = book.id + '|' + code + '|sales-floor';
+      drafts[key] = {
         product_id: String(book.id), isbn_sku: (book.sku || []).join('|'),
         title: book.title, code, kind: 'sales-floor',
         verified_at: new Date().toISOString().slice(0,10)
@@ -223,14 +238,21 @@
       }
       const search = sku.value.trim().toLowerCase();
       if (!search) { status.textContent = 'Scan a book barcode or enter its Shopify ID.'; return; }
-      const hits = catalog.filter(book => book.id === search || (book.sku || []).some(s => s.toLowerCase() === search));
+      const exact = catalog.filter(book => book.id === search || (book.sku || []).some(s => s.toLowerCase() === search));
       const box = $('loc-staff-matches'); box.replaceChildren();
+      const titleQuery = normalized(search);
+      const titleMatches = !exact.length && titleQuery.length >= 3 && /[a-z]/.test(titleQuery)
+        ? catalog.filter(book => normalized(book.title + ' ' + book.author).includes(titleQuery)).slice(0, 15)
+        : [];
+      const hits = exact.length ? exact : titleMatches;
       if (!hits.length) {
-        status.textContent = 'No exact ISBN/SKU or product ID match among currently listed books. Check Shopify; no assignment saved.';
+        status.textContent = 'No exact ISBN/SKU or title match among currently listed books. Check Shopify or hold the item for manual catalog review; no assignment saved.';
         return;
       }
-      if (hits.length === 1) { set(hits[0], code); return; }
-      status.textContent = 'Multiple books match this code. Choose the exact edition before assigning a shelf.';
+      if (exact.length === 1) { set(exact[0], code); return; }
+      status.textContent = exact.length
+        ? 'Multiple editions share this barcode. Select the exact edition before assigning a shelf.'
+        : 'Title search only: verify the physical book edition before selecting. No automatic barcode match was found.';
       hits.forEach(book => {
         const b = elt('button', 'loc-match', book.title + ' (' + book.id + ') → ' + code);
         b.type = 'button'; b.addEventListener('click', () => set(book, code)); box.appendChild(b);
