@@ -12,6 +12,7 @@
     return n;
   };
   const normalized = value => String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const codeKey = value => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const money = amount => '$' + Number(amount).toFixed(2);
   const itemUrl = book => '/products/' + encodeURIComponent(book.handle) + '/';
   let catalog = [], locations = {}, builtAt = '', shown = 0, results = [];
@@ -26,13 +27,14 @@
     return rows.length ? rows.map(row => row.code).join(', ') : '';
   }
   function searchable(book) {
-    return normalized([book.title, book.author, book.subject, ...(book.sku || []), book.id].join(' '));
+    return normalized([book.title, book.author, book.subject, book.isbn, ...(book.sku || []), book.id].join(' '));
   }
   function searchScore(book, q) {
     if (!q) return 1;
     const title = normalized(book.title), author = normalized(book.author);
-    const skus = (book.sku || []).map(normalized);
-    if (String(book.id) === q || skus.includes(q)) return 1000;
+    const cq = codeKey(q);
+    const skus = (book.sku || []).map(codeKey);
+    if (String(book.id) === q || (cq.length >= 8 && (skus.includes(cq) || codeKey(book.isbn) === cq))) return 1000;
     if (title === q) return 950;
     if (title.startsWith(q)) return 800;
     if (author === q) return 750;
@@ -51,7 +53,8 @@
     return 0;
   }
   function sectionField(book) {
-    const p = elt('p', 'loc-subject', book.subject || 'Book');
+    const formats = {video: 'Video', audio: 'Audio course', journal: 'Journal or workbook', set: 'Book and deck set'};
+    const p = elt('p', 'loc-subject', (book.subject || 'Book') + (formats[book.format] ? ' · ' + formats[book.format] : ''));
     return p;
   }
   function photo(book, cls) {
@@ -107,7 +110,8 @@
       panel.appendChild(elt('strong', 'loc-unmapped', 'Shelf location not yet mapped'));
       panel.appendChild(elt('p', 'loc-small', 'This title appears in the online book catalog. Ask staff to help locate a copy.'));
     }
-    if (book.sku && book.sku.length) panel.appendChild(elt('p', 'loc-code', 'ISBN / SKU: ' + book.sku.join(', ')));
+    if (book.isbn) panel.appendChild(elt('p', 'loc-code', 'Verified ISBN: ' + book.isbn));
+    if (book.sku && book.sku.length) panel.appendChild(elt('p', 'loc-code', 'SKU: ' + book.sku.join(', ')));
     panel.appendChild(elt('p', 'loc-code', 'Product reference: ' + book.id));
     if (mode !== 'kiosk') {
       const a = elt('a', 'loc-secondary', 'View online book listing');
@@ -220,7 +224,7 @@
     const set = (book, code) => {
       const key = book.id + '|' + code + '|sales-floor';
       drafts[key] = {
-        product_id: String(book.id), isbn_sku: (book.sku || []).join('|'),
+        product_id: String(book.id), isbn_sku: [book.isbn, ...(book.sku || [])].filter(Boolean).join('|'),
         title: book.title, code, kind: 'sales-floor',
         verified_at: new Date().toISOString().slice(0,10)
       };
@@ -238,7 +242,11 @@
       }
       const search = sku.value.trim().toLowerCase();
       if (!search) { status.textContent = 'Scan a book barcode or enter its Shopify ID.'; return; }
-      const exact = catalog.filter(book => book.id === search || (book.sku || []).some(s => s.toLowerCase() === search));
+      const qcode = codeKey(search);
+      const exact = catalog.filter(book =>
+        String(book.id) === search ||
+        (qcode.length >= 8 && (codeKey(book.isbn) === qcode || (book.sku || []).some(s => codeKey(s) === qcode)))
+      );
       const box = $('loc-staff-matches'); box.replaceChildren();
       const titleQuery = normalized(search);
       const titleMatches = !exact.length && titleQuery.length >= 3 && /[a-z]/.test(titleQuery)
