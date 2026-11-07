@@ -15,6 +15,8 @@ VERIFIED_BOOKS = {
     ('7640001380430', '9781646710508'),
     # Discovery Tarot Path, a printed paperback guidebook. Type is blank; the title ends in "Deck".
     ('7640120852558', '9781618521248'),
+    # It's All Magic, a printed book of daily reflections. Legacy type is Tarot Deck.
+    ('7639463460942', '9781401978693'),
 }
 def _pid_isbn(p):
     pid = str(p.get('id') or '')

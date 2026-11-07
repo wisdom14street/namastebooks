@@ -281,6 +281,27 @@ same_title['product_type'] = ''
 same_title['variants'][0]['sku'] = '9781618521248'
 if sitecopy.category(same_title) is not None:
     fail('the same title is not included without the verified product id')
+coventry = _fake('Coventry Magic with Candles, Oils, and Herbs by Jacki Smith', ['nb-shelf:witchcraft'], typ='')
+coventry['variants'][0]['sku'] = '9781578635108'
+if sitecopy.category(coventry) != 'witchcraft':
+    fail('Coventry Magic is already a book from its blank type and ISBN, on witchcraft')
+magic = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', ['nb-shelf:spirit'], typ='Tarot Deck')
+magic['id'] = 7639463460942
+magic['variants'][0]['sku'] = '9781401978693'
+if sitecopy.category(magic) != 'spirit':
+    fail('the verified It\'s All Magic paperback should be included on spirit, not dropped as a deck')
+other_deck = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', ['nb-shelf:spirit'], typ='Tarot Deck')
+other_deck['id'] = 42
+other_deck['variants'][0]['sku'] = '9781401978693'
+if sitecopy.category(other_deck) is not None:
+    fail('a Tarot Deck product is not included just because the ISBN matches It\'s All Magic')
+wrong_isbn = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', ['nb-shelf:spirit'], typ='Tarot Deck')
+wrong_isbn['id'] = 7639463460942
+wrong_isbn['variants'][0]['sku'] = '9780000000001'
+if sitecopy.category(wrong_isbn) is not None:
+    fail('the It\'s All Magic product id is not enough without its ISBN')
+if _shelf('The First Female Pharaoh: Sobekneferu, Goddess of the Seven Stars by Andrew Collins', ['nb-shelf:history-culture-travel']) != 'history-culture-travel':
+    fail('a reviewed history tag should file First Female Pharaoh on history')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
