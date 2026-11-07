@@ -23,6 +23,18 @@ VERIFIED_BOOKS = {
     ('7640013078606', '9781615990214'),  # The True Nature of Tarot
     # Tarot of Love, a printed companion. Type is Home Decor and the title names a deck.
     ('7639911891022', '9780880795210'),
+    # Printed books whose Shopify type is still Oracle Cards.
+    ('7842801680462', '9781803419947'),  # Many Veils of the Moon
+    ('7842802303054', '9781803419961'),  # Palmistry of Fingerprints
+    ('7842804465742', '9781637747636'),  # Your Anxiety Is Giving Me Anxiety
+}
+# Card sets that include a substantial printed guidebook. Matched by product id and ISBN.
+# A plain deck is not included. The result is a book-and-deck set, not a standalone book.
+VERIFIED_SETS = {
+    ('7774867947598', '9780738743196'),  # Secret Language of Animals, cards plus a printed guidebook
+    ('7820721455182', '9798894141367'),  # Eras Tarot, deck and guidebook
+    ('7842801320014', '9781923208186'),  # Japanese Gods & Spirits Oracle, cards plus a printed guidebook
+    ('7842913812558', '9798337402154'),  # Dune Bene Gesserit, deck and guide
 }
 def _pid_isbn(p):
     pid = str(p.get('id') or '')
@@ -45,7 +57,9 @@ def isbn_of(p):
     return ''
 def book_kind(p):
     """'book', 'set' (book-and-deck set) or None"""
-    if _pid_isbn(p) in VERIFIED_BOOKS: return 'book'
+    pair = _pid_isbn(p)
+    if pair in VERIFIED_SETS: return 'set'
+    if pair in VERIFIED_BOOKS: return 'book'
     t, ty = p['title'], (p.get('product_type') or '').strip().lower()
     sku = (p['variants'][0].get('sku') or '').strip()
     if ty in ('tarot deck','oracle cards','oracle deck','lenormand deck','mini deck','affirmation deck','tarot set','tarot kit','celtic oracle deck','dream oracle deck','astrology oracle deck','inspirational cards','affirmation cards','inspiration cards','collectable cards','playing cards'):
