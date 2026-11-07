@@ -40,6 +40,9 @@
 .loc-code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.85rem; color:#574b3f; overflow-wrap:anywhere; }
 .loc-staff-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
 .loc-draft { border-bottom:1px solid var(--loc-line); padding:8px 0; font-size:.88rem; overflow-wrap:anywhere; }
+.loc-draft-row { display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid var(--loc-line); }
+.loc-draft-row .loc-draft { border-bottom:0; flex:1; }
+.loc-remove { cursor:pointer; font:inherit; font-size:.82rem; background:white; color:#773b21; border:1px solid #bba18f; border-radius:7px; padding:8px 10px; }
 .loc-match { display:block; text-align:left; width:100%; margin:6px 0; border:1px solid #ab855b; background:#fff7e5; border-radius:8px; padding:12px; cursor:pointer; font:inherit; }
 [data-locator-mode="kiosk"] .loc-intro { text-align:center; }
 [data-locator-mode="kiosk"] .loc-intro p { margin-inline:auto; }
