@@ -39,6 +39,43 @@ VERIFIED_SETS = {
     ('7842913812558', '9798337402154'),  # Dune Bene Gesserit, deck and guide
     ('7842933375054', '9788484451761'),  # Tarot Osho Zen, Spanish cards plus a printed book
     ('7884847710286', '9781961814301'),  # Torah in the Tarot, cards plus an explanatory booklet
+    # In-stock sets whose type is still a card deck, each with a substantial printed guidebook.
+    ('7915082842190', '9781454964247'),  # Found World Oracle
+    ('7981390299214', '9781401975265'),  # Ritual Deck
+    ('8095415468110', '9780762481286'),  # Dreamgate Oracle
+    ('8095424348238', '9780762482603'),  # Golden Mantras
+    ('8203367546958', '9781572819962'),  # Playing Marseille
+    ('8203421352014', '9781922785961'),  # Sacred Spirit Oracle
+    ('8203424202830', '9781925682847'),  # Sacred Spirit Reading Cards
+    ('8203462639694', '9781398847903'),  # Yoga Mudra Oracle book and deck
+    ('7633570005070', '9781572817562'),  # Oracle of Visions
+    ('7633583800398', '9780738752303'),  # Divine Circus Oracle
+    ('7633583833166', '9781572817890'),  # Halloween Oracle
+    ('7633583865934', '9780738738994'),  # Gaia Oracle
+    ('7633578786894', '9781922785800'),  # Resurrection Oracle
+    ('7639076831310', '9780593579114'),  # Phantomwise Tarot
+    ('7639352475726', '9781801292481'),  # Practical Magic Activation Deck
+    ('8203363123278', '9781572815254'),  # Playing Card Oracles
+    ('7616944996430', '9781572816299'),  # Paulina Tarot
+    ('7633578885198', '9781646711659'),  # Norse Goddess Rune Oracle
+    ('7633586225230', '9781646712090'),  # Golden Keys of Gaia
+    ('7633586257998', '9781646712243'),  # Secret Language of Darkness Oracle
+    ('7633588256846', '9781572819719'),  # Precious Gems Oracle
+    ('7616860225614', '9781646710218'),  # Wise Dog Tarot
+    ('7616945061966', '9781646710034'),  # Pride Tarot
+    ('7616954925134', '9781572816626'),  # Joie de Vivre Tarot
+    ('7633577771086', '9781646712618'),  # Dracones Loqui
+    ('7633585504334', '9781646711710'),  # Soul Mirror Oracle
+    ('7633586290766', '9780738745794'),  # Myths and Mermaids
+    ('7633570103374', '9781572818323'),  # Mystical Wisdom Card Deck
+    ('7633570693198', '9781646710898'),  # Goddess Spirit Oracle
+    ('7633570725966', '9781401944711'),  # Soul's Journey Lesson Cards
+    ('7633578852430', '9781646712489'),  # Moon Temple Oracle
+    ('7633582719054', '9781646712465'),  # Soul Wisdom Oracle
+    ('7616951648334', '9780738744346'),  # Mystic Faerie Tarot
+    ('7618404548686', '9780978696818'),  # Chakra Meditation Kit, book, cards, and CD
+    ('7633578754126', '9780738779621'),  # Herbarium Oracle
+    ('7633585438798', '9781646711949'),  # Curious Travels Tarot
 }
 def _pid_isbn(p):
     pid = str(p.get('id') or '')
