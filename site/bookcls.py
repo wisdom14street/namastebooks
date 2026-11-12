@@ -96,6 +96,7 @@ def isbn_of(p):
     if is_isbn(raw): return raw
     if is_isbn(sku): return sku
     return ''
+DECK_TYPES = ('tarot deck','oracle cards','oracle deck','lenormand deck','mini deck','affirmation deck','tarot set','tarot kit','celtic oracle deck','dream oracle deck','astrology oracle deck','inspirational cards','affirmation cards','inspiration cards','collectable cards','playing cards')
 def book_kind(p):
     """'book', 'set' (book-and-deck set) or None"""
     pair = _pid_isbn(p)
@@ -103,7 +104,10 @@ def book_kind(p):
     if pair in VERIFIED_BOOKS: return 'book'
     t, ty = p['title'], (p.get('product_type') or '').strip().lower()
     sku = (p['variants'][0].get('sku') or '').strip()
-    if ty in ('tarot deck','oracle cards','oracle deck','lenormand deck','mini deck','affirmation deck','tarot set','tarot kit','celtic oracle deck','dream oracle deck','astrology oracle deck','inspirational cards','affirmation cards','inspiration cards','collectable cards','playing cards'):
+    if ty in DECK_TYPES:
+        # A deck with one reviewed shelf tag is listed on that shelf. Untagged decks stay off.
+        # Charts, notebooks, and other non-deck types never reach this branch.
+        if reviewed_shelf(p): return 'set'
         return 'set' if SETOK.search(t) or (ty in ('tarot set','tarot kit') and re.search(r'book', t, re.I)) else None
     if ty == 'greeting cards': return None
     if re.search(r'reading with|\bmins?\b|minute reading|witch talk|hypnotherapy|energy cleansing with', t, re.I): return None

@@ -252,11 +252,15 @@ cartomancy['product_type'] = ''
 cartomancy['variants'][0]['sku'] = '9781646710508'
 if sitecopy.category(cartomancy) != 'divination':
     fail('the verified cartomancy guide should be included on divination')
-deck = _fake('Everyday Tarot Deck', ['nb-shelf:tarot'], typ='Tarot Deck')
+deck = _fake('Everyday Tarot Deck', [], typ='Tarot Deck')
 deck['id'] = 999
 deck['variants'][0]['sku'] = '9781646710508'
 if sitecopy.category(deck) is not None:
-    fail('a deck is not included just because the ISBN matches a verified book')
+    fail('an untagged deck is not included just because the ISBN matches a verified book')
+tagged_deck = _fake('Everyday Tarot Deck', ['nb-shelf:tarot'], typ='Tarot Deck')
+tagged_deck['id'] = 999
+if sitecopy.category(tagged_deck) != 'tarot':
+    fail('a deck with one nb-shelf tag belongs on that shelf')
 if _shelf('The Perfumed Garden by Captain Sir Richard F. Burton') != 'sexuality-relationships':
     fail('The Perfumed Garden is sexuality and relationship literature')
 if _shelf('The Perfumed Garden by Captain Sir Richard F. Burton') in ('self-help', 'religions'):
@@ -290,12 +294,12 @@ magic['id'] = 7639463460942
 magic['variants'][0]['sku'] = '9781401978693'
 if sitecopy.category(magic) != 'spirit':
     fail('the verified It\'s All Magic paperback should be included on spirit, not dropped as a deck')
-other_deck = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', ['nb-shelf:spirit'], typ='Tarot Deck')
+other_deck = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', [], typ='Tarot Deck')
 other_deck['id'] = 42
 other_deck['variants'][0]['sku'] = '9781401978693'
 if sitecopy.category(other_deck) is not None:
-    fail('a Tarot Deck product is not included just because the ISBN matches It\'s All Magic')
-wrong_isbn = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', ['nb-shelf:spirit'], typ='Tarot Deck')
+    fail('an untagged Tarot Deck is not included just because the ISBN matches It\'s All Magic')
+wrong_isbn = _fake('It’s All Magic: 365 Reflections on Astrology, Tarot, and Manifestation by Aliza Kelly', [], typ='Tarot Deck')
 wrong_isbn['id'] = 7639463460942
 wrong_isbn['variants'][0]['sku'] = '9780000000001'
 if sitecopy.category(wrong_isbn) is not None:
@@ -318,11 +322,11 @@ other_upc['handle'] = 'other-upc-fixture'
 other_upc['variants'][0]['sku'] = '824297633389'
 if sitecopy.category(other_upc) != 'esoteric' or sitecopy.INFO['other-upc-fixture']['isbn']:
     fail('the same UPC on another product is not given this ISBN')
-upc_deck = _fake('Everyday Oracle Deck', ['nb-shelf:esoteric'], typ='Oracle Cards')
+upc_deck = _fake('Everyday Oracle Deck', [], typ='Oracle Cards')
 upc_deck['id'] = 7639974641742
 upc_deck['variants'][0]['sku'] = '824297633389'
 if sitecopy.category(upc_deck) is not None:
-    fail('the verified ISBN pair does not turn a deck into a book')
+    fail('the verified ISBN pair does not turn an untagged deck into a book')
 if isbn_of(other_upc):
     fail('isbn_of should ignore a UPC that is not the verified pair')
 cleary = 'The Art of War by Sun Tzu (translated by Thomas Cleary)'
@@ -360,8 +364,8 @@ if sitecopy.category(_verified('The True Nature of Tarot by Diane Wing', 7640013
     fail('The True Nature of Tarot is a verified printed guide')
 if sitecopy.category(_verified('Tarot of Love: A Companion Guide to the Tarot of Love Deck by Gayan Sylvie Winter', 7639911891022, '9780880795210', 'Home Decor', ['nb-shelf:tarot'])) != 'tarot':
     fail('Tarot of Love is a verified printed companion, not dropped for the word Deck')
-if sitecopy.category(_verified('Tarot: Unlocking the Arcana by Angelo Nasios', 50, '9780764350375', 'Tarot Deck', ['nb-shelf:tarot'])) is not None:
-    fail('a deck is not included because its ISBN matches a verified guide')
+if sitecopy.category(_verified('Tarot: Unlocking the Arcana by Angelo Nasios', 50, '9780764350375', 'Tarot Deck', [])) is not None:
+    fail('an untagged deck is not included because its ISBN matches a verified guide')
 if sitecopy.category(_verified('Oracle of the 7 Energies Journal by Colette Baron-Reid', 7640535662670, '9781401962913', 'Journal', ['nb-shelf:journals'])) != 'journals':
     fail('a guided journal with an ISBN stays on the journal shelf')
 if sitecopy.category(_verified('Blank Notebook', 7640535662670, '9781401962913', '', [])) is not None:
@@ -382,8 +386,8 @@ if sitecopy.category(_verified('Palmistry of Fingerprints By Christopher Jones',
     fail('Palmistry of Fingerprints is a verified printed book')
 if sitecopy.category(_verified('Your Anxiety Is Giving Me Anxiety By Elizabeth April', 7842804465742, '9781637747636', 'Oracle Cards', ['nb-shelf:self-help'])) != 'self-help':
     fail('Your Anxiety Is Giving Me Anxiety is a verified printed book')
-if sitecopy.category(_verified('Everyday Oracle Deck', 8, '9780738743196', 'Oracle Cards', ['nb-shelf:divination'])) is not None:
-    fail('a plain oracle deck is not included because the ISBN matches a verified set')
+if sitecopy.category(_verified('Everyday Oracle Deck', 8, '9780738743196', 'Oracle Cards', [])) is not None:
+    fail('an untagged oracle deck is not included because the ISBN matches a verified set')
 franklin = _verified('The 13 Virtues of Benjamin Franklin', 7637433614414, '816667421986', 'books', [])
 if isbn_of(franklin):
     fail('the Franklin UPC is not an ISBN and is not mapped')
@@ -395,19 +399,21 @@ if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inay
     fail('Tears from the Mother of the Sun is a verified printed novella')
 if sitecopy.category(_verified('Torah in the Tarot by Stav Appel', 7884847710286, '9781961814301', 'Tarot Deck', ['nb-shelf:tarot'])) != 'tarot':
     fail('Torah in the Tarot is a verified card set with a printed booklet')
-if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inayat Khan', 3, '9798888501825', 'Tarot Deck', ['nb-shelf:fiction'])) is not None:
-    fail('the novella ISBN does not include a different Tarot Deck product')
+if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inayat Khan', 3, '9798888501825', 'Tarot Deck', [])) is not None:
+    fail('the novella ISBN does not include a different untagged Tarot Deck')
 for pid, sku in (('7915082842190','9781454964247'),('8095424348238','9780762482603'),('8203367546958','9781572819962'),('7618404548686','9780978696818'),('7639076831310','9780593579114')):
     if (pid, sku) not in VERIFIED_SETS or book_kind(_verified('A Deck and Guidebook', int(pid), sku, 'Oracle Cards', ['nb-shelf:divination'])) != 'set':
         fail(f'verified guidebook set {pid} should be included')
-if sitecopy.category(_verified('Justasana Oracle Deck', 7638479634510, '9780738775906', 'Oracle Cards', ['nb-shelf:hindu-yoga'])) is not None:
-    fail('pose reference cards are not a printed guidebook set')
+if sitecopy.category(_verified('Justasana Oracle Deck', 7638479634510, '9780738775906', 'Oracle Cards', ['nb-shelf:hindu-yoga'])) != 'hindu-yoga':
+    fail('a tagged pose-card deck belongs on its shelf')
 if sitecopy.category(_verified('Palmistry Guide Chart 8 Pages', 7634790678606, 'IGPAL', 'Info Guides', ['nb-shelf:divination'])) is not None:
     fail('an info chart is not included by its shelf tag')
-if sitecopy.category(_verified('Imperial Dragon Oracle', 7616880803918, '9781572816411', 'Oracle Deck', ['nb-shelf:divination'])) is not None:
-    fail('a concise booklet oracle is not the substantial-guidebook exception')
-if sitecopy.category(_verified('Found World Oracle', 4, '9781454964247', 'Oracle Cards', ['nb-shelf:divination'])) is not None:
-    fail('the Found World ISBN does not include a different oracle deck')
+if sitecopy.category(_verified('Imperial Dragon Oracle', 7616880803918, '9781572816411', 'Oracle Deck', ['nb-shelf:divination'])) != 'divination':
+    fail('a tagged oracle deck belongs on its shelf')
+if sitecopy.category(_verified('Found World Oracle', 4, '9781454964247', 'Oracle Cards', [])) is not None:
+    fail('an untagged deck is not included because the ISBN matches a verified set')
+if sitecopy.category(_verified('Blank Notebook', 77, '9780000000002', '', ['nb-shelf:journals'])) is not None:
+    fail('a blank notebook stays off even with a shelf tag')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
