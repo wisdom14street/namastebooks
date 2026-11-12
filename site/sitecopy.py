@@ -159,7 +159,12 @@ def _spines(S):
     return '<nav class="spines" aria-label="Shelves">' + ''.join(f'<a href="/shop/{S.AISLES[k][2]}/" style="--c:{_dark(S.AISLES[k][4])}"><span>{E(S.AISLES[k][1])}</span><small>{S.cat_count[k]}</small></a>' for k in HOME_ORDER if k in S.AISLE_KEYS) + '</nav>'
 def HOME_BODY(S):
     top = f'''<section class="bookhead"><div class="wrap"><h1>Namaste Books <span>spiritual, metaphysical &amp; philosophy books</span></h1>
-<p class="small">{S.N:,} books in stock, sorted onto {len(S.AISLE_KEYS)} shelves. The books come from <a href="{S.SHOP}">Namaste Bookshop</a> at 2 W 14th St, NYC, which ships them or holds them for pickup.</p>{_spines(S)}</div></section>'''
+<p class="small">{S.N:,} books in stock, sorted onto {len(S.AISLE_KEYS)} shelves. The books come from <a href="{S.SHOP}">Namaste Bookshop</a> at 2 W 14th St, NYC, which ships them or holds them for pickup.</p>
+<nav class="chips" aria-label="Bookstore quick links">
+<a class="btn" href="/shop/">Browse all books</a>
+<a class="btn alt" href="/new-arrivals/">New arrivals</a>
+<a class="btn alt" href="/visit/">Visit &amp; pickup</a>
+</nav>{_spines(S)}</div></section>'''
     rows = []
     if S.HAS_RANK: rows.append(shelf_row(S, 'Popular at Namaste right now', S.by_rank(S.leaders), '/shop/', 'Browse all books', 'Ordered by what sells most at Namaste Bookshop.'))
     rows.append(shelf_row(S, 'Just added to the shelves', _new(S), '/new-arrivals/', 'Everything just added'))
