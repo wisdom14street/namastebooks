@@ -164,7 +164,9 @@ def HOME_BODY(S):
 <a class="btn" href="/shop/">Browse all books</a>
 <a class="btn alt" href="/new-arrivals/">New arrivals</a>
 <a class="btn alt" href="/visit/">Visit &amp; pickup</a>
-</nav>{_spines(S)}</div></section>'''
+</nav>
+<p class="small">New to spiritual books? <a href="/guide/choosing-your-first-book/">Find your first book &rarr;</a></p>
+{_spines(S)}</div></section>'''
     rows = []
     if S.HAS_RANK: rows.append(shelf_row(S, 'Popular at Namaste right now', S.by_rank(S.leaders), '/shop/', 'Browse all books', 'Ordered by what sells most at Namaste Bookshop.'))
     rows.append(shelf_row(S, 'Just added to the shelves', _new(S), '/new-arrivals/', 'Everything just added'))
@@ -314,18 +316,39 @@ def FAQ(S):
 
 def GUIDES(S):
     tiles = ''.join(f'<li><a href="/shop/{S.AISLES[k][2]}/"><b>{E(S.AISLES[k][0])}</b></a> <span class="small">{S.cat_count[k]} books</span><br><span class="small">{E(S.AISLES[k][3])}</span></li>' for k in HOME_ORDER if k in S.AISLE_KEYS)
+    def shelf_link(key, label):
+        href = f'/shop/{S.AISLES[key][2]}/' if key in S.AISLE_KEYS else '/shop/'
+        return f'<a href="{href}">{label}</a>'
+
     return [
      {'path': '/shelves/', 'title': 'Every Shelf in the Store', 'desc': f'The {len(S.AISLE_KEYS)} shelves of Namaste Books with what each covers and how many books are on it.', 'h1': 'Every shelf in the store',
       'html': f'<p class="lead">Start from a subject. Each shelf opens with its most-read titles, then every book on it.</p><ul class="dir shelves">{tiles}</ul>'},
      {'path': '/new-arrivals/', 'title': 'Just Added', 'desc': 'The books most recently added to Namaste Books, newest first.', 'h1': 'Just added to the shelves', 'wide': True,
       'html': f'<p class="lead">The latest titles to arrive, newest first. This list refreshes every day.</p>{S.grid(_new(S)[:48])}<p><a class="btn" href="/shop/?sort=new">See every book, newest first</a></p>'},
-     {'path': '/guide/choosing-your-first-book/', 'title': 'How to Choose Your First Spiritual Book', 'desc': 'A bookseller-style way to pick a first book on tarot, astrology, meditation or magic: start with a question, check the shelf, read the first page.', 'h1': 'Choosing your first book on a new subject',
-      'html': '''<p class="lead">Walking into a new subject is easier with one good book than with ten. A few habits help you find it.</p>
-<h2>Start with a question, not a topic</h2><p>"Tarot" is huge. "How do I read three cards for myself?" is a question a single book can answer. Pick the question, then look for a title that promises to answer it.</p>
-<h2>Check which shelf it sits on</h2><p>The shelf tells you the angle. A book on the moon can be astrology, witchcraft or a meditation guide. Our <a href="/shelves/">shelf list</a> shows what each one covers.</p>
-<h2>Prefer a practice book first, a history second</h2><p>Hands-on titles (spreads to try, a sitting routine, a first spell) keep you going. Histories and deep references make more sense once you have tried the practice.</p>
-<h2>Follow one author for a while</h2><p>Many writers here have several books in stock. If the first one clicks, the <a href="/authors/">author pages</a> make the next pick easy.</p>
-<h2>Ask at the shop</h2><p>Namaste Bookshop's staff on West 14th Street can point you along the shelves in person.</p><p><a class="btn" href="/reading-list/learning-tarot/">Books for learning tarot</a></p>'''},
+     {'path': '/guide/choosing-your-first-book/', 'title': 'How to Choose Your First Spiritual Book', 'desc': 'Find a first book on tarot, meditation, or yoga philosophy. Compare three reading paths and try a free seven-day tarot practice.', 'h1': 'How to choose your first spiritual book',
+      'html': f'''<p class="lead">Start with one question you want a book to answer. Then look for a first chapter you would want to keep reading or an exercise you can try this week.</p>
+<p><a href="#seven-day-tarot-practice">Jump to the free seven-day tarot practice &darr;</a></p>
+<h2>Three ways to start</h2>
+<ul class="dir">
+<li><b>Tarot.</b> &ldquo;How do I read the cards in my first deck?&rdquo; Look for illustrated examples that match your deck and show how to read one card before introducing spreads. {shelf_link('tarot', 'Browse tarot books')}.</li>
+<li><b>Meditation.</b> &ldquo;What do I do for the first five minutes?&rdquo; Open to a sample practice. Look for plain instructions on posture, attention, and what to do when your mind wanders. {shelf_link('meditation', 'Browse meditation books')}.</li>
+<li><b>Yoga philosophy.</b> &ldquo;What ideas sit behind the practice?&rdquo; Compare the same passage in two translations if you can. An introduction or commentary can explain unfamiliar terms as they appear. {shelf_link('hindu-yoga', 'Browse yoga and Vedanta books')}.</li>
+</ul>
+<h2>Try the first-page test</h2>
+<p>Read one page and close the book. Can you explain one idea in your own words or name one thing to try? If the language feels clear and you want to keep going, you have a good candidate. If you are looking for a different angle, <a href="/shelves/">compare the shelves</a> or <a href="/authors/">browse by author</a>.</p>
+<h2 id="seven-day-tarot-practice">A free seven-day tarot practice</h2>
+<p>Use a deck you already have and a notebook or notes app. Set aside five minutes a day. These prompts are for looking closely at the pictures and reflecting on what they bring to mind.</p>
+<ol>
+<li><b>Look before you read.</b> Draw one card. Write down the first detail you noticed and two things you see in the picture.</li>
+<li><b>Ask an open question.</b> Try &ldquo;What could I pay more attention to today?&rdquo; Draw a card and write one possible connection to your question.</li>
+<li><b>Compare your reading.</b> Read the guidebook entry after making your own notes. Underline one point that fits and one that surprises you.</li>
+<li><b>Change the angle.</b> Revisit a card from earlier in the week. Look at the background instead of the main figure and write what you missed the first time.</li>
+<li><b>Try three cards.</b> Lay them left to right for &ldquo;What do I notice?&rdquo;, &ldquo;What might I be overlooking?&rdquo;, and &ldquo;What small step could I try?&rdquo; Write one sentence for each.</li>
+<li><b>Read the cards together.</b> Look for one detail the three cards share or one contrast between them. Write a short sentence that connects the images.</li>
+<li><b>Review your notes.</b> Circle the question that gave you the most to write about. Keep that question for next week and write down one thing you want a book to explain.</li>
+</ol>
+<p><b>Journal line:</b> Card &middot; Detail I noticed &middot; What it made me consider &middot; What I want to read next.</p>
+<h2>Browse in person</h2><p>Bring your question or the name of a deck to Namaste Bookshop at 2 West 14th Street in New York City. <a href="/visit/">See hours, directions, and pickup information</a>.</p>'''},
     ]
 NOT_FOUND = 'That page is not on our shelves'
 def ICON_DRAW(d, s, th):
