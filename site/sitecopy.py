@@ -348,6 +348,8 @@ def GUIDES(S):
 <li><b>Review your notes.</b> Circle the question that gave you the most to write about. Keep that question for next week and write down one thing you want a book to explain.</li>
 </ol>
 <p><b>Journal line:</b> Card &middot; Detail I noticed &middot; What it made me consider &middot; What I want to read next.</p>
+<h2>Get an in-person tarot reading in NYC</h2>
+<p>Bring a question from your practice to a tarot reader at Namaste Bookshop, 2 West 14th Street near Union Square. <a href="https://namastebookshop.com/pages/tarot-readings-nyc?utm_source=namastebooks&amp;utm_medium=referral&amp;utm_campaign=nyc_tarot_readings&amp;utm_content=first_book_guide">Explore NYC tarot readings and compare readers</a>. Choose a reader to see available appointments on Square.</p>
 <h2>Browse in person</h2><p>Bring your question or the name of a deck to Namaste Bookshop at 2 West 14th Street in New York City. <a href="/visit/">See hours, directions, and pickup information</a>.</p>'''},
     ]
 NOT_FOUND = 'That page is not on our shelves'
