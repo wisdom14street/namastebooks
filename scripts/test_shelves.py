@@ -9,7 +9,7 @@ from collections import Counter
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path[:0] = [os.path.join(ROOT, 'scripts'), os.path.join(ROOT, 'site')]
 import sitecopy
-from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES, reviewed_shelf, SHELF_KEYS, is_isbn, isbn_of
+from bookcls import book_kind, off_topic, is_spanish_title, split_author, title_parts, _TITLE_RULES, reviewed_shelf, SHELF_KEYS, is_isbn, isbn_of, VERIFIED_SETS
 
 RAW = json.load(open(os.path.join(ROOT, 'data', 'all_products.json')))
 FAILS = []
@@ -397,6 +397,17 @@ if sitecopy.category(_verified('Torah in the Tarot by Stav Appel', 7884847710286
     fail('Torah in the Tarot is a verified card set with a printed booklet')
 if sitecopy.category(_verified('Tears from the Mother of the Sun By Pir Zia Inayat Khan', 3, '9798888501825', 'Tarot Deck', ['nb-shelf:fiction'])) is not None:
     fail('the novella ISBN does not include a different Tarot Deck product')
+for pid, sku in (('7915082842190','9781454964247'),('8095424348238','9780762482603'),('8203367546958','9781572819962'),('7618404548686','9780978696818'),('7639076831310','9780593579114')):
+    if (pid, sku) not in VERIFIED_SETS or book_kind(_verified('A Deck and Guidebook', int(pid), sku, 'Oracle Cards', ['nb-shelf:divination'])) != 'set':
+        fail(f'verified guidebook set {pid} should be included')
+if sitecopy.category(_verified('Justasana Oracle Deck', 7638479634510, '9780738775906', 'Oracle Cards', ['nb-shelf:hindu-yoga'])) is not None:
+    fail('pose reference cards are not a printed guidebook set')
+if sitecopy.category(_verified('Palmistry Guide Chart 8 Pages', 7634790678606, 'IGPAL', 'Info Guides', ['nb-shelf:divination'])) is not None:
+    fail('an info chart is not included by its shelf tag')
+if sitecopy.category(_verified('Imperial Dragon Oracle', 7616880803918, '9781572816411', 'Oracle Deck', ['nb-shelf:divination'])) is not None:
+    fail('a concise booklet oracle is not the substantial-guidebook exception')
+if sitecopy.category(_verified('Found World Oracle', 4, '9781454964247', 'Oracle Cards', ['nb-shelf:divination'])) is not None:
+    fail('the Found World ISBN does not include a different oracle deck')
 
 if FAILS:
     print(f'\n{len(FAILS)} FAILURES')
