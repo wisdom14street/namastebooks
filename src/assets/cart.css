@@ -1,8 +1,8 @@
 /* on-site cart: header icon, slide-out drawer, /cart/ page and product-card buttons (themed by each site's CSS variables) */
-.cartbtn{order:2;margin-left:auto;position:relative;display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;color:var(--onink);text-decoration:none}
+.cartbtn{order:2;margin-left:auto;display:inline-flex;flex:none;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:0 6px;border-radius:22px;color:var(--onink);font:700 14px var(--body);text-decoration:none;white-space:nowrap}
 .cartbtn:hover{background:#ffffff14}.cartbtn svg{width:26px;height:26px;display:block}
 .cartbtn:focus-visible,.atc:focus-visible,.cq button:focus-visible,.cadd:focus-visible,.cx:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.cartn{position:absolute;top:2px;right:0;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--onaccent);font:700 12px/20px var(--body);text-align:center}
+.cartn{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--onaccent);font:700 12px/20px var(--body);text-align:center}
 .cartn[hidden]{display:none}
 @media(min-width:1000px){.cartbtn{order:3;margin-left:0}}
 .cw{display:flex;flex-direction:column;gap:6px;min-width:0}.cw>.card{flex:1}
@@ -51,5 +51,5 @@ html.cart-open{overflow:hidden}
 .cadd{min-height:36px;padding:6px 14px;border-radius:var(--btnr);border:2px solid var(--accent);background:var(--accent);color:var(--onaccent);font:700 13px var(--body);cursor:pointer}
 .cartpage .cbody{padding:0}.cartpage{max-width:720px}
 @media (prefers-reduced-motion:reduce){.cdrawer,.cdim,.atc{transition:none}}
-@media(max-width:999px){.nav{flex-wrap:wrap}.nav .logo{flex:0 1 auto;min-width:0;max-width:calc(100% - 104px);line-height:1.1}.nav .wordmark{white-space:normal}}
-@media(max-width:479px){.nav{gap:4px}.nav .logo{font-size:clamp(14px,4.4vw,19px)}.nav .logo .mark svg{width:28px;height:28px}.cartbtn{width:42px;height:42px}}
+@media(max-width:999px){.nav{flex-wrap:wrap}.nav .logo{flex:1 1 0;min-width:0;line-height:1.1}.nav .wordmark{white-space:normal}.nav .menu{flex:none}}
+@media(max-width:479px){.nav{gap:4px}.nav .logo{font-size:clamp(14px,4.4vw,19px)}.nav .logo .mark svg{width:28px;height:28px}}
