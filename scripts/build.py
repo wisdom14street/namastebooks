@@ -233,7 +233,7 @@ def nav():
     return f'''<a class="skip" href="#main">Skip to content</a><header class="top"><div class="bar"><a href="/visit/">{P2C["bar"]}</a><span>Open every day from 11 AM</span>{'<span>Order online, collect on 14th St</span>' if PICKUP_ON else ''}</div>
 <div class="nav wrap"><a class="logo" href="/" aria-label="{E(BRAND)} home">{logo()}</a>
 <form class="search" action="/shop/" role="search" autocomplete="off"><label class="sr" for="hq">Search {E(BRAND)}</label><input id="hq" name="q" type="search" placeholder="{E(C.SEARCH_PLACEHOLDER)}" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><ul id="sugg" class="sugg" role="listbox" hidden></ul></form>
-<a class="cartbtn" href="/cart/" data-cart-open aria-label="Cart, 0 items">{CART_ICON}<span class="cartn" data-cart-count hidden>0</span></a>
+<a class="cartbtn" href="/cart/" data-cart-open aria-label="Cart, 0 items">{CART_ICON}<span>Cart</span><span class="cartn" data-cart-count aria-hidden="true" hidden>0</span></a>
 <button class="menu" aria-label="Menu" aria-expanded="false" aria-controls="mainnav"><span></span><span></span></button>
 <nav class="links" id="mainnav" aria-label="Main"><a href="/visit/" class="vlink">Visit</a><a href="/shop/">Shop all</a>{links}{getattr(C, 'NAV_EXTRA', '')}{'<a href="/authors/">Authors</a>' if getattr(C, 'NAV_BRANDS', True) else ''}{f'<a href="/{C.QUIZ["slug"]}/">{E(C.QUIZ["nav"])}</a>' if C.QUIZ else ''}</nav></div></header>'''
 def footer():
