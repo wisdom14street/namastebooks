@@ -16,9 +16,9 @@ COPY = {
  'sign': 'The Namaste Bookshop sign hangs over the south side of 14th Street, close to the Fifth Avenue corner. Tell the counter you have a pickup and give your name.',
  'union': ['Ride the 4, 5, 6, L, N, Q, R or W to <b>14 St&ndash;Union Square</b>.', 'Walk west along 14th Street and cross Fifth Avenue.', 'Keep to the south sidewalk; the shop is a few steps past the corner, roughly 4 minutes in all.'],
  'sixth': ['From <b>14 St / 6 Av</b> (F, M, L) or <b>14 St</b> on the 1, 2 or 3, come up on 14th Street.', 'Head east on the south side toward Fifth Avenue.', 'The shop is just before the Fifth Avenue corner, about 4 minutes away.'],
- 'pickup_intro': 'Pick Pickup at checkout, wait for the email saying the books are ready, then come by.',
+ 'pickup_intro': 'Choose Pickup at checkout if it is available for your order.',
  'vfaq': [('Is Namaste Books a separate store?', 'No. It is an online bookstore; the physical books are at Namaste Bookshop on West 14th Street.'),
-          ('How soon can I collect?', 'Most pickup orders are ready in about 2 hours. Wait for the ready email before you set out.'),
+          ('How soon can I collect?', 'Check the estimate at checkout and wait for your pickup-ready email before setting out.'),
           ('Can I browse the books in person?', 'Yes, during opening hours at 2 West 14th Street.'),
           ('Who do I contact about an order?', 'Call 212-645-0141 or email info@namastebookshop.com.')],
  'llms': 'Online bookstore for spiritual, metaphysical and philosophy books, organized onto subject shelves (tarot, astrology, witchcraft, Buddhism and Zen, meditation, Hinduism and yoga philosophy, mythology, Taoism and feng shui, crystals, energy work, esoteric traditions, self-help, art and design references, physical bodywork and nutrition, fiction and other literature, biography and essays, nature and environment, poetry, sexuality and relationship literature, history culture and travel, military strategy and leadership, Spanish-language titles and more), with author pages and search. Books, plus journals, almanacs, calendars, audio, DVDs and boxed book-and-deck sets. Checkout on Shopify through namastebookshop.com; ships from New York City or pickup at Namaste Bookshop, 2 W 14th St. Phone 212-645-0141. Email info@namastebookshop.com.'}
