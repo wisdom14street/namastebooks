@@ -317,8 +317,9 @@ def FAQ(S):
 def GUIDES(S):
     tiles = ''.join(f'<li><a href="/shop/{S.AISLES[k][2]}/"><b>{E(S.AISLES[k][0])}</b></a> <span class="small">{S.cat_count[k]} books</span><br><span class="small">{E(S.AISLES[k][3])}</span></li>' for k in HOME_ORDER if k in S.AISLE_KEYS)
     def shelf_link(key, label):
-        href = f'/shop/{S.AISLES[key][2]}/' if key in S.AISLE_KEYS else '/shop/'
-        return f'<a href="{href}">{label}</a>'
+        if key not in S.AISLE_KEYS:
+            return '<a href="/shop/">Browse all books</a>'
+        return f'<a href="/shop/{S.AISLES[key][2]}/">{label}</a>'
 
     return [
      {'path': '/shelves/', 'title': 'Every Shelf in the Store', 'desc': f'The {len(S.AISLE_KEYS)} shelves of Namaste Books with what each covers and how many books are on it.', 'h1': 'Every shelf in the store',
