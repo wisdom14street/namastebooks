@@ -198,6 +198,8 @@ def visit_buttons(light=False):
 def visit_block(full=False):
     pk = (f'<p><b>Order now, collect later.</b> Pick Pickup when you check out; books are {READY.lower()}.</p>' if PICKUP_ON else
           f'<p><b>After one particular title?</b> Ring {PHONE} and the shop can check the shelf.</p>')
+    if full:
+        pk = f'<p><b>After one particular title?</b> Ring {PHONE} and the shop can check the shelf.</p>'
     return f'''<div class="visit"><div class="vinfo"><p class="eyebrow dark">{E(C.VISIT_EYEBROW)}</p><h2>{STORE_STREET}</h2>
 <p class="addr">{STORE_ADDR}<br>The books are shelved at <b>Namaste Bookshop</b>, mid-block on the south side of West 14th Street by the Fifth Avenue corner; Union Square station is a short walk east.</p>
 <h3>Hours</h3>{hours_html()}<p class="small">Holidays can change the schedule, so ring {PHONE} if you are making a special trip.</p>
@@ -349,8 +351,8 @@ def p2_visit():
     c = P2C
     walk = lambda steps: '<ol class="walk">' + ''.join(f'<li>{s}</li>' for s in steps) + '</ol>'
     pick = [f'Put your books in the {E(BRAND)} cart and press <b>Check out</b>.',
-            'You land on Shopify at namastebookshop.com. Switch delivery to <b>Pickup</b>; collecting costs nothing.',
-            f'Books are {(READY or "usually ready the same day").lower()}. Hold off until the email says your order is ready.',
+            'If Shopify offers <b>Pickup</b> for your order, select it. Otherwise, you can choose shipping or call the shop to ask about a title.',
+            'Check the pickup estimate at checkout and wait for the email confirming your order is ready before leaving.',
             f'Stop by Namaste Bookshop, {STORE_STREET}, while it is open and tell the counter the name the order is under.']
     return (f'<p class="lead">{c["visit_lead"]}</p>'
             f'<div class="findbox"><h2>Finding the shop</h2><p>{c["sign"]}</p>'
