@@ -235,7 +235,7 @@ def nav():
 <form class="search" action="/shop/" role="search" autocomplete="off"><label class="sr" for="hq">Search {E(BRAND)}</label><input id="hq" name="q" type="search" placeholder="{E(C.SEARCH_PLACEHOLDER)}" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><ul id="sugg" class="sugg" role="listbox" hidden></ul></form>
 <a class="cartbtn" href="/cart/" data-cart-open aria-label="Cart, 0 items">{CART_ICON}<span>Cart</span><span class="cartn" data-cart-count aria-hidden="true" hidden>0</span></a>
 <button class="menu" aria-label="Menu" aria-expanded="false" aria-controls="mainnav"><span></span><span></span></button>
-<nav class="links" id="mainnav" aria-label="Main"><a href="/visit/" class="vlink">Visit</a><a href="/shop/">Shop all</a>{links}{getattr(C, 'NAV_EXTRA', '')}{'<a href="/authors/">Authors</a>' if getattr(C, 'NAV_BRANDS', True) else ''}{f'<a href="/{C.QUIZ["slug"]}/">{E(C.QUIZ["nav"])}</a>' if C.QUIZ else ''}</nav></div></header>'''
+<nav class="links" id="mainnav" aria-label="Main"><a href="/find/" class="vlink">Find in store</a><a href="/visit/" class="vlink">Visit</a><a href="/shop/">Shop all</a>{links}{getattr(C, 'NAV_EXTRA', '')}{'<a href="/authors/">Authors</a>' if getattr(C, 'NAV_BRANDS', True) else ''}{f'<a href="/{C.QUIZ["slug"]}/">{E(C.QUIZ["nav"])}</a>' if C.QUIZ else ''}</nav></div></header>'''
 def footer():
     sib = ''.join(f'<a href="{u}" rel="noopener">{E(n)}</a>' for n, u in CFG.get('siblings', []))
     expl = ''.join(f'<a href="{u}">{E(n)}</a>' for n, u in C.FOOTER_EXPLORE(S))
@@ -622,6 +622,10 @@ page('/cart/', f'Your cart | {BRAND}', f'Your {BRAND} cart. Check out on Shopify
      '<meta name="robots" content="noindex">', canonical=False, index=False)
 page('/404.html', f'Page not found | {BRAND}', 'Page not found', f'<section class="wrap prose nf"><p class="eyebrow dark">404</p><h1>{E(C.NOT_FOUND)}</h1><p>{E("This page may have been reshelved or removed.")}</p><form class="nfsearch" action="/shop/" role="search"><label class="sr" for="nfq">Search</label><input id="nfq" name="q" type="search" placeholder="{E(C.SEARCH_PLACEHOLDER)}"><button class="btn" type="submit">Search</button></form><h2>Or browse</h2><div class="chips">{"".join(f"<a class=\"chip\" href=\"/shop/{AISLES[k][2]}/\">{E(AISLES[k][0])}</a>" for k in AISLE_KEYS)}</div><p><a class="btn alt" href="/">Home</a> <a class="btn alt" href="/shop/">Shop everything</a></p></section>', canonical=False, index=False)
 
+# ---- customer finder, kiosk and staff shelf mapping pilot ----
+from locator_feature import publish as publish_locator
+LOCATOR_SUMMARY = publish_locator(page, ROOT, DIST, products, AISLES, BR.NAME, SITE, C.INFO)
+
 # ---- sitemap / robots / CNAME ----
 open(os.path.join(DIST, '.nojekyll'), 'w').write('')
 if SITE.startswith('https://') and 'github.io' not in SITE: open(os.path.join(DIST, 'CNAME'), 'w').write(SITE.split('://', 1)[1] + '\n')
@@ -632,6 +636,7 @@ open(os.path.join(DIST, 'llms.txt'), 'w').write(p2_llms())
 summary = {'site': SITE, 'count': len(products), 'cards': len(leaders), 'aisles': {AISLES[k][0]: cat_count[k] for k in AISLE_KEYS}, 'brands': {BR.NAME[k]: n for k, n in brand_count.most_common()},
            'brand_pages': len(dir_items), 'pages': len(SITEMAP), 'pickup_on': PICKUP_ON, 'ready': READY, 'ranked': HAS_RANK, 'min_stick': S.MIN_STICK, 'under10': S.UNDER10,
            'review_url_set': bool(REVIEW_URL), 'gsc_set': bool(GSV)}
+summary['physical_book_finder'] = LOCATOR_SUMMARY
 json.dump(summary, open(os.path.join(ROOT, 'data', 'summary.json'), 'w'), indent=1)
 json.dump(sorted(x['id'] for x in products), open(os.path.join(ROOT, 'data', 'included.json'), 'w'))
 print(json.dumps({k: v for k, v in summary.items() if k != 'brands'}))
