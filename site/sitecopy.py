@@ -309,7 +309,9 @@ def FAQ(S):
     return [('Are these new books?', 'Yes. Listings are new stock from Namaste Bookshop unless a listing says otherwise.'),
             ("I can't find a title. Can you get it?", f'Call <a href="tel:{S.TEL}">{S.PHONE}</a> or email <a href="mailto:info@namastebookshop.com">info@namastebookshop.com</a> and ask; the shop can tell you whether it can be ordered.'),
             ('Do you sell tarot decks here?', 'This site is for books. The only decks here are boxed sets that include a full book. Namaste Bookshop sells decks on its own site.'),
-            ('Do you have books in Spanish?', 'Yes, see <a href="/shop/libros-en-espanol/">Libros en Espa\u00f1ol</a>.'),
+            ('Do you have books in Spanish?',
+             f'Yes, see <a href="/shop/{S.AISLES["spanish"][2]}/" lang="es">Libros en Espa\u00f1ol</a>.'
+             if 'spanish' in S.AISLE_KEYS else 'Search by title or author in <a href="/shop/">all books</a>.'),
             ('How does shipping work?', 'Checkout runs on Shopify through namastebookshop.com. You see every delivery option and its price before paying; parcels leave from New York.'),
             ('Can I pick up instead?', f'Yes. Choose Pickup at checkout and collect at Namaste Bookshop, {S.STORE_ADDR}.' + (f' Orders are {S.READY.lower()}.' if S.READY else '')),
             ('How are books sorted onto shelves?', 'By the main subject of the title, unless a bookseller has assigned a shelf. Taoist books sit with Chinese wisdom, myth retellings have their own shelf, and a general meditation guide is not filed as Buddhism. Novels and stories have a literature shelf. Other biographies and essays have their own shelf, while a philosophy biography stays with philosophy. A paper or design reference is not filed as spirituality, and a physical massage or nutrition book is not filed as energy work or herbs. Sexuality and relationship literature is not filed as self-help, and a history of a city or culture is not filed as a religion. A confirmed military-strategy edition is filed as strategy and leadership, not as Taoism or self-help. Search still finds a book either way.')]
