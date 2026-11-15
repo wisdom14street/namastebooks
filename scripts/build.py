@@ -19,6 +19,34 @@ FAM_LABEL, FAM_ALL = getattr(C, 'FAM_LABEL', 'Scent family'), getattr(C, 'FAM_AL
 STYLE_LABEL, STYLE_ALL = getattr(C, 'STYLE_LABEL', 'Style'), getattr(C, 'STYLE_ALL', 'All styles')
 
 CFG = json.load(open(os.path.join(ROOT, 'site', 'config.json')))
+def _load_seo():
+    try:
+        return json.load(open(os.path.join(ROOT, 'data', 'storefront_seo.json')))
+    except Exception:
+        return {}
+SEO = _load_seo()
+def _img_key(url):
+    return (url or '').split('?', 1)[0].rstrip('/').lower()
+def product_alt(x, url, fallback):
+    """Shopify image alt when the Storefront API supplied one; otherwise the generated fallback."""
+    rec = SEO.get(x.get('handle')) or {}
+    alts = rec.get('alts') or {}
+    key = _img_key(url)
+    alt = alts.get(key) or alts.get(key.rsplit('/', 1)[-1])
+    if isinstance(alt, str) and alt.strip():
+        return alt.strip()
+    return fallback
+def page_title_desc(x):
+    """SEO title and description from Shopify, falling back to the generated title and blurb."""
+    rec = SEO.get(x.get('handle')) or {}
+    seo_title = (rec.get('title') or '').strip()
+    seo_desc = (rec.get('description') or '').strip()
+    if seo_title:
+        low = seo_title.lower()
+        title = seo_title if low.endswith(BRAND.lower()) or f'| {BRAND}'.lower() in low else f'{seo_title} | {BRAND}'
+    else:
+        title = f"{x['dtitle']} | {BRAND}"
+    return title, seo_desc
 DIST = os.path.join(ROOT, 'dist')
 PREVIEW = '--preview' in sys.argv
 SITE = CFG['site_url'].rstrip('/')
@@ -280,7 +308,7 @@ def _card(x, eager=False):
     pre = f'<small>{n} options from</small> ' if n > 1 else (f'<s>{money(x["compare"])}</s> ' if x['compare'] else '')
     u = x['images'][0]
     ph = (f'<div class="ph" style="--c:{AISLES[x["aisle"]][4]}">{ph_html(x)}</div>' if x['noimg'] else
-          f'<div class="ph"><img {"fetchpriority=\"high\" " if eager else "loading=\"lazy\" "}decoding="async" src="{img(u,400)}" srcset="{srcset(u,(200,300,400,600))}" sizes="(min-width:1050px) 23vw,(min-width:700px) 31vw,47vw" alt="{E(x["dtitle"])}" width="400" height="400"></div>')
+          f'<div class="ph"><img {"fetchpriority=\"high\" " if eager else "loading=\"lazy\" "}decoding="async" src="{img(u,400)}" srcset="{srcset(u,(200,300,400,600))}" sizes="(min-width:1050px) 23vw,(min-width:700px) 31vw,47vw" alt="{E(product_alt(x, u, x["dtitle"]))}" width="400" height="400"></div>')
     return (f'<a class="card" href="/products/{x["handle"]}/">{ph}'
             f'<div class="meta"><span class="tag" style="--c:{AISLES[x["aisle"]][4]}">{E(tag_of(x))}</span><h3>{E(x["ctitle"])}</h3><p class="price">{pre}{money(x["price"])}</p>{"<p class=\"pk\">Pickup today</p>" if x["pickup"] and getattr(C, "CARD_PICKUP", False) else ""}</div></a>')
 PH_LABEL = getattr(C, 'PH_LABEL', 'Photo coming soon')
@@ -532,7 +560,7 @@ for x in products:
     a = AISLES[x['aisle']]
     avail = [v for v in x['variants'] if v['available']]; v0 = avail[0]
     imgs = x['images']
-    gallery = ''.join(f'<button type="button" class="th{" on" if i==0 else ""}" data-src="{img(u,1200)}" data-srcset="{srcset(u,(600,900,1200))}" aria-label="Show photo {i+1} of {len(imgs)}"{" aria-current=\"true\"" if i==0 else ""}><img loading="lazy" src="{img(u,160)}" alt="" width="80" height="80"></button>' for i, u in enumerate(imgs))
+    gallery = ''.join(f'<button type="button" class="th{" on" if i==0 else ""}" data-src="{img(u,1200)}" data-srcset="{srcset(u,(600,900,1200))}" aria-label="Show photo {i+1} of {len(imgs)}"{" aria-current=\"true\"" if i==0 else ""}><img loading="lazy" src="{img(u,160)}" alt="{E(product_alt(x, u, ""))}" width="80" height="80"></button>' for i, u in enumerate(imgs))
     orig = PR.clean_body(x['raw_body'], getattr(C, 'DESC_MODE', 'strict'), title=x['title'])
     opts = ''
     if len(x['variants']) > 1:
@@ -579,7 +607,7 @@ for x in products:
     for title, xs in ((C.REL_BRAND.format(brand=BR.NAME.get(x['brand'], '')), same_brand), (C.REL_SCENT.format(scent=FAM_NAME.get(x['family'], '').lower()), same_scent), (C.REL_PAIR, pair), (C.REL_MORE.format(aisle=a[0].lower()), more)):
         if xs: rows += f'<section class="wrap"><div class="sechead"><h2>{E(title)}</h2></div>{grid(xs)}</section>'
     mainph = (f'<div class="main isnoimg" style="--c:{a[4]}">{ph_html(x)}</div>' if x['noimg'] else
-              f'<div class="main"><img id="mainimg" src="{img(imgs[0],900)}" srcset="{srcset(imgs[0],(400,600,800,1000,1200))}" sizes="(min-width:900px) 52vw,100vw" alt="{E(x['dtitle'])}" width="1200" height="1200" fetchpriority="high">{f'<span class="pcount" aria-hidden="true">1 / {len(imgs)}</span>' if len(imgs) > 1 else ''}</div>')
+              f'<div class="main"><img id="mainimg" src="{img(imgs[0],900)}" srcset="{srcset(imgs[0],(400,600,800,1000,1200))}" sizes="(min-width:900px) 52vw,100vw" alt="{E(product_alt(x, imgs[0], x['dtitle']))}" width="1200" height="1200" fetchpriority="high">{f'<span class="pcount" aria-hidden="true">1 / {len(imgs)}</span>' if len(imgs) > 1 else ''}</div>')
     h1sub = C.H1_SUB(S, x) if hasattr(C, 'H1_SUB') else ''
     ohead = getattr(C, 'DESC_HEAD', 'Description')
     body = f'''{crumbs_html(cr)}<section class="wrap pdp" data-handle="{x['handle']}"><div class="gallery">{mainph}{f'<div class="thumbs">{gallery}</div>' if len(imgs)>1 and not x['noimg'] else ''}</div>
@@ -588,7 +616,8 @@ for x in products:
 {p2_badges(True)}{p2set}
 <p class="note">You finish the order on Shopify at namastebookshop.com, picking delivery{" or pickup" if x['pickup'] else ""} and checking everything before you pay.</p>
 <div class="desc">{''.join(f'<p>{s}</p>' for s in desc)}</div>{f'<div class="pdesc"><h2>{E(ohead)}</h2>{orig}</div>' if orig else ''}<h2 class="spech">Details</h2><dl class="facts">{''.join(f'<div><dt>{p}</dt><dd>{q}</dd></div>' for p, q in facts)}</dl>{pk}<p class="small"><a href="/shipping/">Shipping</a> &middot; <a href="/returns/">Returns</a></p></div></section>{rows}{p2tail}'''
-    page(f"/products/{x['handle']}/", f"{x['dtitle']} | {BRAND}", C.PRODUCT_DESC(S, x, v0), body,
+    seo_title, seo_desc = page_title_desc(x)
+    page(f"/products/{x['handle']}/", seo_title, seo_desc or C.PRODUCT_DESC(S, x, v0), body,
          ldjson(ld) + ldjson(crumbs_ld(cr)) + f'<script>window.NI_PRODUCT={json.dumps({"handle": x["handle"], "cartAttr": CART_ATTR, "shop": SHOP})}</script>', og_image=None if x['noimg'] else img(imgs[0], 1200))
 
 # ---- info pages ----

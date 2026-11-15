@@ -26,9 +26,13 @@ jobs:
           python-version: "3.12"
       - run: pip install segno pillow
       - name: Fetch catalog, pickup, best sellers; build namastebooks.com
+        env:
+          SHOPIFY_STOREFRONT_TOKEN: ${{ secrets.SHOPIFY_STOREFRONT_TOKEN }}
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}
         run: |
           mkdir -p data
           python3 scripts/fetch.py
+          python3 scripts/storefront_seo.py
           python3 scripts/test_shelves.py
           python3 scripts/pickup.py
           python3 scripts/bestsellers.py || echo "best-seller order unavailable; building without it"
