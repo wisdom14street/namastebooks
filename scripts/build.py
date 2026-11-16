@@ -89,8 +89,8 @@ STORE_STREET = '2 West 14th Street'; STORE_CITY, STORE_REGION, STORE_ZIP = 'New 
 STORE_ADDR = f'{STORE_STREET}, {STORE_CITY}, {STORE_REGION} {STORE_ZIP}'
 PHONE, TEL = '212-645-0141', '+12126450141'
 GEO = (40.73602, -73.99404)
-HOURS = [('Monday to Thursday', '11 AM to 8 PM'), ('Friday and Saturday', '11 AM to 9 PM'), ('Sunday', '11 AM to 7 PM')]
-HOURS_LD = [(['Monday', 'Tuesday', 'Wednesday', 'Thursday'], '11:00', '20:00'), (['Friday', 'Saturday'], '11:00', '21:00'), (['Sunday'], '11:00', '19:00')]
+HOURS = [('Monday to Thursday', '11 AM to 8 PM'), ('Friday and Saturday', '11 AM to 9 PM'), ('Sunday', '11 AM to 8 PM')]
+HOURS_LD = [(['Monday', 'Tuesday', 'Wednesday', 'Thursday'], '11:00', '20:00'), (['Friday', 'Saturday'], '11:00', '21:00'), (['Sunday'], '11:00', '20:00')]
 MAP_Q = '2+West+14th+Street,+New+York,+NY+10011'
 MAP_EMBED = f'https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s{MAP_Q}!6i16'
 MAP_LINK = f'https://www.google.com/maps/search/?api=1&query={MAP_Q}'
